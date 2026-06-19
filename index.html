@@ -238,7 +238,7 @@
   .guest-card { padding: 14px; background: #FAFAFF; border-radius: 16px; border: 2px solid #EEEEF5; transition: border .2s; }
   .guest-card:hover { border-color: #DDD; }
   .guest-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-  .avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 800; font-family: 'Nunito', sans-serif; color: #fff; flex-shrink: 0; }
   .guest-info { flex: 1; min-width: 0; }
   .guest-name { font-weight: 800; font-size: 17px; line-height: 1.25; color: var(--dark); word-break: break-word; }
   .guest-sub { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: 2px; }
@@ -1230,7 +1230,7 @@ function renderGuests(){
     const waBtn = g.phone?`<button class="btn-icon btn-whatsapp" title="Enviar WhatsApp" onclick="sendWhatsApp('${g.id}')">📲</button>`:'';
     return `<div class="guest-card">
       <div class="guest-top">
-        <div class="avatar" style="background:#f0f0ff">${g.avatar}</div>
+        <div class="avatar" style="background:${getAvatarColor(g.name)}">${getInitials(g.name)}</div>
         <div class="guest-info">
           <div class="guest-name">${esc(g.name)}</div>
           <div class="guest-sub">${sub}</div>
@@ -1578,6 +1578,20 @@ function showTab(name, btn){
 function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+const AVATAR_PALETTE = ['#FF6B9D','#C77DFF','#4ECDC4','#6BCB77','#FFB454','#5DA9E9','#F2789F','#9D8DF1','#3FBF9D','#F4845F'];
+function getInitials(name){
+  const parts = (name||'').trim().split(/\s+/).filter(Boolean);
+  if(!parts.length) return '?';
+  if(parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (parts[0].charAt(0) + parts[parts.length-1].charAt(0)).toUpperCase();
+}
+function getAvatarColor(name){
+  const str = name || '';
+  let hash = 0;
+  for(let i=0; i<str.length; i++){ hash = str.charCodeAt(i) + ((hash << 5) - hash); }
+  return AVATAR_PALETTE[Math.abs(hash) % AVATAR_PALETTE.length];
+}
 function formatPhone(p){ return p.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3'); }
 function formatDate(d){ if(!d) return ''; const [y,m,day]=d.split('-'); return `${day}/${m}/${y}`; }
 
