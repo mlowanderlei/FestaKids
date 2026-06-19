@@ -234,7 +234,30 @@
   .btn-export:hover { background: #2D9E52; color: #fff; border-color: #2D9E52; }
   .responsible-legend { font-size: 10px; color: var(--muted); font-weight: 600; margin-bottom: 10px; }
 
-  .guest-list { display: flex; flex-direction: column; gap: 10px; }
+  .guest-toolbar { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
+  .sort-select {
+    flex: 1 1 auto; min-width: 0; padding: 8px 10px; border: 2px solid #EEEEF5;
+    border-radius: 10px; font-family: 'Nunito', sans-serif; font-size: 12px;
+    font-weight: 700; background: #FAFAFF; color: var(--dark);
+  }
+  .sort-select:focus { outline: none; border-color: var(--c1); }
+
+  .guest-tag-badge {
+    font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 20px;
+    background: #EFF0FF; color: #5B5FE3; flex-shrink: 0;
+  }
+
+  .pagination { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
+  .page-btn {
+    min-width: 32px; height: 32px; padding: 0 8px; border-radius: 8px; border: 2px solid #EEEEF5;
+    background: #fff; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12px;
+    cursor: pointer; color: var(--dark); transition: all .2s;
+  }
+  .page-btn:hover:not(:disabled) { border-color: var(--c1); }
+  .page-btn.active { background: var(--dark); color: #fff; border-color: var(--dark); }
+  .page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .page-info { font-size: 11px; color: var(--muted); font-weight: 700; text-align: center; margin-top: 6px; }
+
   .guest-card { padding: 14px; background: #FAFAFF; border-radius: 16px; border: 2px solid #EEEEF5; transition: border .2s; }
   .guest-card:hover { border-color: #DDD; }
   .guest-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
@@ -297,6 +320,14 @@
   .modal { background: var(--white); border-radius: 28px 28px 0 0; padding: 24px 20px 32px; width: 100%; max-width: 520px; animation: slideUp .25s ease; max-height: 85vh; overflow-y: auto; }
   @keyframes slideUp { from{transform:translateY(60px);opacity:0} to{transform:translateY(0);opacity:1} }
   .modal-title { font-family: var(--title-font); font-size: 20px; margin-bottom: 16px; text-align: center; }
+  .edit-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 6px; }
+  .edit-form .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .edit-form input, .edit-form select {
+    flex: 1 1 120px; min-width: 0; padding: 11px 12px; border: 2px solid #EEEEF5;
+    border-radius: 10px; font-family: 'Nunito', sans-serif; font-size: 14px; background: #FAFAFF;
+  }
+  .edit-form input:focus, .edit-form select:focus { outline: none; border-color: var(--c1); }
+  .edit-form label.field-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: -4px; display: block; }
   .status-options { display: flex; gap: 10px; }
   .status-opt { flex: 1; padding: 14px 8px; border-radius: 14px; border: 2.5px solid #EEEEF5; text-align: center; cursor: pointer; font-weight: 700; font-size: 13px; transition: all .2s; }
   .status-opt .ico { font-size: 22px; display: block; margin-bottom: 4px; }
@@ -327,6 +358,40 @@
   .settings-preview::before { content: attr(data-banner); position: absolute; top: -6px; left: 0; font-size: 36px; opacity: 0.15; letter-spacing: 10px; white-space: nowrap; }
   #previewLogo { font-size: 36px; position: relative; z-index: 1; }
   #previewTitle { font-size: 22px; color: #fff; position: relative; z-index: 1; font-family: var(--title-font); }
+
+  /* ── RESUMO ── */
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .summary-card {
+    background: var(--white); border-radius: 18px; padding: 16px 14px; text-align: center;
+    box-shadow: var(--card-shadow);
+  }
+  .summary-card .num { font-family: var(--title-font); font-size: 30px; line-height: 1; }
+  .summary-card .lbl { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+  .summary-card.total .num { color: var(--dark); }
+  .summary-card.confirmed .num { color: var(--mint); }
+  .summary-card.pending .num { color: var(--yellow); }
+  .summary-card.declined .num { color: #E03E2D; }
+
+  .bar-chart { display: flex; flex-direction: column; gap: 10px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; }
+  .bar-label { font-size: 12px; font-weight: 700; color: var(--dark); width: 64px; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 22px; background: #EEEEF5; border-radius: 8px; overflow: hidden; position: relative; }
+  .bar-fill { height: 100%; border-radius: 8px; transition: width .5s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; }
+  .bar-fill span { font-size: 11px; font-weight: 800; color: #fff; }
+  .bar-count { font-size: 13px; font-weight: 800; width: 24px; text-align: right; flex-shrink: 0; }
+
+  .gender-split { display: flex; gap: 12px; }
+  .gender-card {
+    flex: 1; border-radius: 16px; padding: 18px 10px; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .gender-card .emoji { font-size: 32px; }
+  .gender-card .count { font-family: var(--title-font); font-size: 24px; }
+  .gender-card .label { font-size: 11px; font-weight: 700; text-transform: uppercase; }
+  .gender-card.menina { background: #FFF0F6; }
+  .gender-card.menina .count, .gender-card.menina .label { color: #D6498C; }
+  .gender-card.menino { background: #EFF6FF; }
+  .gender-card.menino .count, .gender-card.menino .label { color: #2E6FD9; }
 
   .account-row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: #FAFAFF; border-radius: 12px; border: 2px solid #EEEEF5; margin-bottom: 12px; }
   .account-row .ico { font-size: 22px; }
@@ -459,6 +524,7 @@
     <button class="tab-btn active" onclick="showTab('info',this)"><span>🏠</span>Festa</button>
     <button class="tab-btn" onclick="showTab('checklist',this)"><span>✅</span>Checklist</button>
     <button class="tab-btn" onclick="showTab('guests',this)"><span>👥</span>Convidados</button>
+    <button class="tab-btn" onclick="showTab('summary',this)"><span>📊</span>Resumo</button>
     <button class="tab-btn" onclick="showTab('messages',this)"><span>💬</span>WhatsApp</button>
     <button class="tab-btn" onclick="showTab('settings',this)"><span>⚙️</span>Config</button>
   </div>
@@ -536,6 +602,7 @@
             <option value="confirmed">✅ Confirmado</option>
             <option value="declined">❌ Não vem</option>
           </select>
+          <input type="text" id="guestTag" placeholder="Tag (ex: nº convite, grupo)" maxlength="30">
         </div>
         <label class="responsible-check">
           <input type="checkbox" id="guestResponsible" checked>
@@ -555,10 +622,42 @@
       <button class="btn-export" onclick="exportGuests()">📊 Exportar planilha</button>
     </div>
 
+    <div class="guest-toolbar">
+      <select class="sort-select" id="sortSelect" onchange="changeSorting()">
+        <option value="recent">🕐 Mais recentes</option>
+        <option value="alpha">🔤 Ordem alfabética (A–Z)</option>
+        <option value="alpha-desc">🔤 Ordem alfabética (Z–A)</option>
+        <option value="tag">🏷️ Por tag</option>
+      </select>
+    </div>
+
     <div class="responsible-legend">⭐ = recebe mensagens em massa &nbsp;·&nbsp; ☆ = não recebe (clique na estrela para alternar)</div>
 
     <div class="guest-list" id="guestList">
       <div class="empty"><div class="emoji">🎈</div><p>Nenhum convidado ainda.</p></div>
+    </div>
+
+    <div class="pagination" id="guestPagination"></div>
+    <div class="page-info" id="guestPageInfo"></div>
+  </div>
+
+  <!-- RESUMO -->
+  <div id="tab-summary" class="section">
+    <div class="summary-grid">
+      <div class="summary-card total"><div class="num" id="sumTotal">0</div><div class="lbl">Total de convidados</div></div>
+      <div class="summary-card confirmed"><div class="num" id="sumConfirmed">0</div><div class="lbl">Confirmados</div></div>
+      <div class="summary-card pending"><div class="num" id="sumPending">0</div><div class="lbl">Aguardando</div></div>
+      <div class="summary-card declined"><div class="num" id="sumDeclined">0</div><div class="lbl">Não vêm</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎂 Crianças por Idade</div>
+      <div class="bar-chart" id="ageChart"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">👧👦 Crianças por Sexo</div>
+      <div class="gender-split" id="genderChart"></div>
     </div>
   </div>
 
@@ -645,16 +744,42 @@
 
 </main>
 
-<!-- MODAL STATUS -->
-<div class="modal-overlay" id="statusModal">
+<!-- MODAL EDITAR CONVIDADO -->
+<div class="modal-overlay" id="editModal">
   <div class="modal">
-    <div class="modal-title" id="modalGuestName">Atualizar presença</div>
-    <div class="status-options">
-      <div class="status-opt" id="optConfirmed" onclick="setStatus('confirmed')"><span class="ico">✅</span>Confirmado</div>
-      <div class="status-opt" id="optPending"   onclick="setStatus('pending')"><span class="ico">⏳</span>Aguardando</div>
-      <div class="status-opt" id="optDeclined"  onclick="setStatus('declined')"><span class="ico">❌</span>Não vem</div>
+    <div class="modal-title">✏️ Editar Convidado</div>
+    <div class="edit-form">
+      <div class="row">
+        <input type="text" id="editName" placeholder="Nome do convidado">
+        <input type="tel" id="editPhone" placeholder="WhatsApp (ex: 11999999999)">
+      </div>
+      <div class="row">
+        <select id="editType" onchange="toggleEditAgeField()">
+          <option value="adulto">🧑 Adulto</option>
+          <option value="crianca">🧒 Criança</option>
+        </select>
+        <select id="editGender" style="display:none">
+          <option value="menina">👧 Menina</option>
+          <option value="menino">👦 Menino</option>
+        </select>
+        <input type="number" id="editAge" placeholder="Idade (anos)" min="0" max="17" style="display:none">
+      </div>
+      <div class="row">
+        <input type="text" id="editTag" placeholder="Tag (ex: nº convite, grupo)" maxlength="30">
+      </div>
+      <label class="field-label">Status de presença</label>
+      <div class="status-options">
+        <div class="status-opt" id="editOptConfirmed" onclick="setEditStatus('confirmed')"><span class="ico">✅</span>Confirmado</div>
+        <div class="status-opt" id="editOptPending"   onclick="setEditStatus('pending')"><span class="ico">⏳</span>Aguardando</div>
+        <div class="status-opt" id="editOptDeclined"  onclick="setEditStatus('declined')"><span class="ico">❌</span>Não vem</div>
+      </div>
+      <label class="responsible-check">
+        <input type="checkbox" id="editResponsible">
+        <span>📲 Responsável pelo WhatsApp (recebe as mensagens da família)</span>
+      </label>
     </div>
-    <button class="btn-close-modal" onclick="closeModal()">Cancelar</button>
+    <button class="btn-primary" id="saveEditBtn" onclick="saveGuestEdit()" style="margin-top:6px">💾 Salvar Alterações</button>
+    <button class="btn-close-modal" onclick="closeEditModal()">Cancelar</button>
   </div>
 </div>
 
@@ -689,6 +814,9 @@ let tasks = [];
 let guests = [];
 let guestFilter = 'all';
 let editingGuestId = null;
+let guestSort = 'recent';
+let guestPage = 1;
+const GUESTS_PER_PAGE = 8;
 let appSettings = { title:'FestaKids', font:'Baloo 2', logo:'🎂', banner:'🎈🎁🎂🎉🎊', theme:'menina' };
 
 const CAT_COLORS = {'Decoração':'#FF6B9D','Comida':'#FFD93D','Convite':'#C77DFF','Entretenimento':'#4ECDC4','Logística':'#6BCB77','Outro':'#8B8BA0'};
@@ -994,7 +1122,7 @@ async function loadAllData(){
     guests = (guestRows || []).map(r => ({
       id: r.id, name: r.name, phone: r.phone || '', type: r.guest_type,
       gender: r.gender || '', age: r.age != null ? String(r.age) : '',
-      status: r.status, responsible: r.responsible, avatar: r.avatar || '🧑'
+      status: r.status, tag: r.tag || '', responsible: r.responsible, avatar: r.avatar || '🧑'
     }));
   }
 
@@ -1084,6 +1212,66 @@ function updateStats(){
 }
 
 // ════════════════════════════════════════════════════════════
+// SUMMARY TAB
+// ════════════════════════════════════════════════════════════
+function renderSummary(){
+  const total = guests.length;
+  const confirmed = guests.filter(g=>g.status==='confirmed').length;
+  const pending = guests.filter(g=>g.status==='pending').length;
+  const declined = guests.filter(g=>g.status==='declined').length;
+
+  document.getElementById('sumTotal').textContent = total;
+  document.getElementById('sumConfirmed').textContent = confirmed;
+  document.getElementById('sumPending').textContent = pending;
+  document.getElementById('sumDeclined').textContent = declined;
+
+  // Age breakdown (children only)
+  const children = guests.filter(g=>g.type==='crianca' && g.age);
+  const ageCounts = {};
+  children.forEach(g=>{
+    const age = g.age;
+    ageCounts[age] = (ageCounts[age]||0) + 1;
+  });
+  const ageChartEl = document.getElementById('ageChart');
+  const ageKeys = Object.keys(ageCounts).sort((a,b)=>Number(a)-Number(b));
+  if(!ageKeys.length){
+    ageChartEl.innerHTML = '<div class="empty" style="padding:16px"><div class="emoji">🎂</div><p>Nenhuma criança com idade cadastrada ainda.</p></div>';
+  } else {
+    const maxCount = Math.max(...ageKeys.map(k=>ageCounts[k]));
+    ageChartEl.innerHTML = ageKeys.map(age=>{
+      const count = ageCounts[age];
+      const pct = Math.round((count/maxCount)*100);
+      return `<div class="bar-row">
+        <div class="bar-label">${age} ano${age==1?'':'s'}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:linear-gradient(90deg,var(--c1),var(--c2))"></div></div>
+        <div class="bar-count">${count}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Gender breakdown (children only)
+  const meninas = guests.filter(g=>g.type==='crianca' && g.gender==='menina').length;
+  const meninos = guests.filter(g=>g.type==='crianca' && g.gender==='menino').length;
+  const genderChartEl = document.getElementById('genderChart');
+  if(meninas===0 && meninos===0){
+    genderChartEl.innerHTML = '<div class="empty" style="padding:16px;width:100%"><div class="emoji">👧👦</div><p>Nenhuma criança cadastrada ainda.</p></div>';
+  } else {
+    genderChartEl.innerHTML = `
+      <div class="gender-card menina">
+        <div class="emoji">👧</div>
+        <div class="count">${meninas}</div>
+        <div class="label">Meninas</div>
+      </div>
+      <div class="gender-card menino">
+        <div class="emoji">👦</div>
+        <div class="count">${meninos}</div>
+        <div class="label">Meninos</div>
+      </div>
+    `;
+  }
+}
+
+// ════════════════════════════════════════════════════════════
 // CHECKLIST (Supabase persistence)
 // ════════════════════════════════════════════════════════════
 async function addTask(){
@@ -1143,6 +1331,15 @@ function toggleAgeField(){
   genderEl.style.display = isChild ? 'block' : 'none';
   if(!isChild){ ageEl.value=''; }
 }
+function toggleEditAgeField(){
+  const type = document.getElementById('editType').value;
+  const ageEl = document.getElementById('editAge');
+  const genderEl = document.getElementById('editGender');
+  const isChild = type==='crianca';
+  ageEl.style.display = isChild ? 'flex' : 'none';
+  genderEl.style.display = isChild ? 'block' : 'none';
+  if(!isChild){ ageEl.value=''; }
+}
 
 // ════════════════════════════════════════════════════════════
 // GUESTS (Supabase persistence)
@@ -1152,6 +1349,7 @@ async function addGuest(){
   const phone  = document.getElementById('guestPhone').value.trim().replace(/\D/g,'');
   const type   = document.getElementById('guestType').value;
   const status = document.getElementById('guestStatus').value;
+  const tag    = document.getElementById('guestTag').value.trim();
   const isChild = type==='crianca';
   const age    = isChild ? document.getElementById('guestAge').value : '';
   const gender = isChild ? document.getElementById('guestGender').value : '';
@@ -1171,6 +1369,7 @@ async function addGuest(){
     gender: isChild ? gender : null,
     age: isChild && age ? parseInt(age) : null,
     status,
+    tag,
     responsible: phone ? responsible : false,
     avatar
   };
@@ -1182,13 +1381,15 @@ async function addGuest(){
   guests.push({
     id:data.id, name:data.name, phone:data.phone||'', type:data.guest_type,
     gender:data.gender||'', age:data.age!=null?String(data.age):'',
-    status:data.status, responsible:data.responsible, avatar:data.avatar
+    status:data.status, tag:data.tag||'', responsible:data.responsible, avatar:data.avatar
   });
 
   document.getElementById('guestName').value='';
   document.getElementById('guestPhone').value='';
   document.getElementById('guestAge').value='';
+  document.getElementById('guestTag').value='';
   document.getElementById('guestResponsible').checked=true;
+  guestPage = 1;
   renderGuests(); updateStats(); setSynced();
   showToast('🎉 '+name+' adicionado!');
 }
@@ -1210,15 +1411,52 @@ async function toggleResponsible(id){
 }
 function filterGuests(f, el){
   guestFilter=f;
+  guestPage = 1;
   document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
   renderGuests();
 }
+function changeSorting(){
+  guestSort = document.getElementById('sortSelect').value;
+  guestPage = 1;
+  renderGuests();
+}
+function sortGuestList(list){
+  const sorted = [...list];
+  if(guestSort === 'alpha'){
+    sorted.sort((a,b)=> a.name.localeCompare(b.name, 'pt-BR'));
+  } else if(guestSort === 'alpha-desc'){
+    sorted.sort((a,b)=> b.name.localeCompare(a.name, 'pt-BR'));
+  } else if(guestSort === 'tag'){
+    sorted.sort((a,b)=> {
+      const ta = (a.tag||'').trim(), tb = (b.tag||'').trim();
+      if(!ta && tb) return 1;
+      if(ta && !tb) return -1;
+      const cmp = ta.localeCompare(tb, 'pt-BR', {numeric:true});
+      return cmp !== 0 ? cmp : a.name.localeCompare(b.name, 'pt-BR');
+    });
+  }
+  // 'recent' = keep insertion order (already chronological)
+  return sorted;
+}
 function renderGuests(){
   const c = document.getElementById('guestList');
   let list = guestFilter==='all' ? guests : guests.filter(g=>g.status===guestFilter);
-  if(!list.length){ c.innerHTML='<div class="empty"><div class="emoji">🎈</div><p>Nenhum convidado nesta categoria.</p></div>'; return; }
-  c.innerHTML=list.map(g=>{
+  list = sortGuestList(list);
+
+  if(!list.length){
+    c.innerHTML='<div class="empty"><div class="emoji">🎈</div><p>Nenhum convidado nesta categoria.</p></div>';
+    document.getElementById('guestPagination').innerHTML='';
+    document.getElementById('guestPageInfo').textContent='';
+    return;
+  }
+
+  const totalPages = Math.max(1, Math.ceil(list.length / GUESTS_PER_PAGE));
+  if(guestPage > totalPages) guestPage = totalPages;
+  const startIdx = (guestPage-1) * GUESTS_PER_PAGE;
+  const pageItems = list.slice(startIdx, startIdx + GUESTS_PER_PAGE);
+
+  c.innerHTML=pageItems.map(g=>{
     const badge = g.status==='confirmed'
       ? '<span class="status-badge status-confirmed">✅ Confirmado</span>'
       : g.status==='declined'
@@ -1226,6 +1464,7 @@ function renderGuests(){
       : '<span class="status-badge status-pending">⏳ Aguardando</span>';
     const typeText = g.type==='crianca' ? `Criança (${g.gender==='menina'?'menina':'menino'})` : 'Adulto';
     const sub = [typeText, g.age?g.age+' anos':'', g.phone?formatPhone(g.phone):''].filter(Boolean).join(' · ');
+    const tagBadge = g.tag ? `<span class="guest-tag-badge">🏷️ ${esc(g.tag)}</span>` : '';
     const respBtn = g.phone?`<button class="btn-icon" title="${g.responsible?'Responsável pelo WhatsApp (clique para desmarcar)':'Não recebe mensagens em massa (clique para marcar)'}" onclick="toggleResponsible('${g.id}')" style="${g.responsible?'background:#E8F9F0':'opacity:.35'}">${g.responsible?'⭐':'☆'}</button>`:'';
     const waBtn = g.phone?`<button class="btn-icon btn-whatsapp" title="Enviar WhatsApp" onclick="sendWhatsApp('${g.id}')">📲</button>`:'';
     return `<div class="guest-card">
@@ -1238,8 +1477,9 @@ function renderGuests(){
       </div>
       <div class="guest-bottom">
         ${badge}
+        ${tagBadge}
         <div class="guest-actions">
-          <button class="btn-icon" title="Atualizar" onclick="openModal('${g.id}')">✏️</button>
+          <button class="btn-icon" title="Editar" onclick="openEditModal('${g.id}')">✏️</button>
           ${respBtn}
           ${waBtn}
           <button class="btn-icon" title="Remover" onclick="deleteGuest('${g.id}')">🗑</button>
@@ -1247,6 +1487,47 @@ function renderGuests(){
       </div>
     </div>`;
   }).join('');
+
+  renderPagination(totalPages, list.length);
+}
+
+function renderPagination(totalPages, totalItems){
+  const pagEl = document.getElementById('guestPagination');
+  const infoEl = document.getElementById('guestPageInfo');
+
+  if(totalPages <= 1){
+    pagEl.innerHTML = '';
+    infoEl.textContent = totalItems ? `${totalItems} convidado(s)` : '';
+    return;
+  }
+
+  let html = `<button class="page-btn" onclick="goToGuestPage(${guestPage-1})" ${guestPage===1?'disabled':''}>‹</button>`;
+
+  const maxButtons = 5;
+  let startPage = Math.max(1, guestPage - Math.floor(maxButtons/2));
+  let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+  if(endPage - startPage + 1 < maxButtons){ startPage = Math.max(1, endPage - maxButtons + 1); }
+
+  if(startPage > 1){
+    html += `<button class="page-btn" onclick="goToGuestPage(1)">1</button>`;
+    if(startPage > 2) html += `<span style="padding:0 4px;color:var(--muted)">…</span>`;
+  }
+  for(let p=startPage; p<=endPage; p++){
+    html += `<button class="page-btn ${p===guestPage?'active':''}" onclick="goToGuestPage(${p})">${p}</button>`;
+  }
+  if(endPage < totalPages){
+    if(endPage < totalPages-1) html += `<span style="padding:0 4px;color:var(--muted)">…</span>`;
+    html += `<button class="page-btn" onclick="goToGuestPage(${totalPages})">${totalPages}</button>`;
+  }
+
+  html += `<button class="page-btn" onclick="goToGuestPage(${guestPage+1})" ${guestPage===totalPages?'disabled':''}>›</button>`;
+  pagEl.innerHTML = html;
+  infoEl.textContent = `Página ${guestPage} de ${totalPages} · ${totalItems} convidado(s)`;
+}
+function goToGuestPage(p){
+  guestPage = p;
+  renderGuests();
+  document.getElementById('guestList').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1258,13 +1539,13 @@ function exportGuests(){
   const statusLabel = {confirmed:'Confirmado', pending:'Aguardando', declined:'Não vem'};
 
   const data = [
-    ['Nome', 'Tipo', 'Sexo', 'Idade', 'WhatsApp', 'Recebe mensagens', 'Status']
+    ['Nome', 'Tipo', 'Sexo', 'Idade', 'Tag', 'WhatsApp', 'Recebe mensagens', 'Status']
   ];
   guests.forEach(g=>{
     const typeLabel = g.type==='crianca' ? 'Criança' : 'Adulto';
     const genderLabel = g.type==='crianca' ? (g.gender==='menina' ? 'Menina' : 'Menino') : '';
     data.push([
-      g.name, typeLabel, genderLabel, g.age || '',
+      g.name, typeLabel, genderLabel, g.age || '', g.tag || '',
       g.phone ? formatPhone(g.phone) : '',
       g.phone ? (g.responsible ? 'Sim' : 'Não') : '',
       statusLabel[g.status] || g.status
@@ -1275,15 +1556,15 @@ function exportGuests(){
   const pending   = guests.filter(g=>g.status==='pending').length;
   const declined  = guests.filter(g=>g.status==='declined').length;
   data.push([]);
-  data.push(['Resumo', '', '', '', '', '', '']);
-  data.push(['Total de convidados', guests.length, '', '', '', '', '']);
-  data.push(['Confirmados',  confirmed, '', '', '', '', '']);
-  data.push(['Aguardando',   pending,   '', '', '', '', '']);
-  data.push(['Não vêm',      declined,  '', '', '', '', '']);
+  data.push(['Resumo', '', '', '', '', '', '', '']);
+  data.push(['Total de convidados', guests.length, '', '', '', '', '', '']);
+  data.push(['Confirmados',  confirmed, '', '', '', '', '', '']);
+  data.push(['Aguardando',   pending,   '', '', '', '', '', '']);
+  data.push(['Não vêm',      declined,  '', '', '', '', '', '']);
 
   const ws = XLSX.utils.aoa_to_sheet(data);
-  ws['!cols'] = [{wch:28},{wch:10},{wch:10},{wch:8},{wch:18},{wch:16},{wch:14}];
-  ['A1','B1','C1','D1','E1','F1','G1'].forEach(ref=>{
+  ws['!cols'] = [{wch:28},{wch:10},{wch:10},{wch:8},{wch:14},{wch:18},{wch:16},{wch:14}];
+  ['A1','B1','C1','D1','E1','F1','G1','H1'].forEach(ref=>{
     if(ws[ref]) ws[ref].s = {font:{bold:true}, fill:{fgColor:{rgb:'F0E6FF'}}};
   });
 
@@ -1295,30 +1576,85 @@ function exportGuests(){
 }
 
 // ════════════════════════════════════════════════════════════
-// MODAL: STATUS
+// MODAL: EDITAR CONVIDADO (completo)
 // ════════════════════════════════════════════════════════════
-function openModal(id){
-  editingGuestId=id;
-  const g=guests.find(g=>g.id===id);
-  document.getElementById('modalGuestName').textContent='✏️ Presença de '+g.name;
-  ['confirmed','pending','declined'].forEach(s=>{
-    document.getElementById('opt'+capitalize(s)).className='status-opt'+(g.status===s?' sel-'+s:'');
-  });
-  document.getElementById('statusModal').classList.add('open');
-}
-function closeModal(){ document.getElementById('statusModal').classList.remove('open'); editingGuestId=null; }
-async function setStatus(s){
-  const g=guests.find(g=>g.id===editingGuestId);
-  closeModal();
+let editStatusValue = 'pending';
+function openEditModal(id){
+  editingGuestId = id;
+  const g = guests.find(g=>g.id===id);
   if(!g) return;
-  g.status=s; renderGuests(); updateStats();
+
+  document.getElementById('editName').value = g.name;
+  document.getElementById('editPhone').value = g.phone || '';
+  document.getElementById('editType').value = g.type;
+  document.getElementById('editGender').value = g.gender || 'menina';
+  document.getElementById('editAge').value = g.age || '';
+  document.getElementById('editTag').value = g.tag || '';
+  document.getElementById('editResponsible').checked = !!g.responsible;
+  toggleEditAgeField();
+
+  editStatusValue = g.status;
+  ['confirmed','pending','declined'].forEach(s=>{
+    document.getElementById('editOpt'+capitalize(s)).className='status-opt'+(s===editStatusValue?' sel-'+s:'');
+  });
+
+  document.getElementById('editModal').classList.add('open');
+}
+function closeEditModal(){
+  document.getElementById('editModal').classList.remove('open');
+  editingGuestId = null;
+}
+function setEditStatus(s){
+  editStatusValue = s;
+  ['confirmed','pending','declined'].forEach(st=>{
+    document.getElementById('editOpt'+capitalize(st)).className='status-opt'+(st===s?' sel-'+s:'');
+  });
+}
+async function saveGuestEdit(){
+  const g = guests.find(g=>g.id===editingGuestId);
+  if(!g) return;
+
+  const name = document.getElementById('editName').value.trim();
+  if(!name){ showToast('⚠️ Digite o nome do convidado'); return; }
+  const phone = document.getElementById('editPhone').value.trim().replace(/\D/g,'');
+  const type = document.getElementById('editType').value;
+  const isChild = type === 'crianca';
+  const gender = isChild ? document.getElementById('editGender').value : '';
+  const age = isChild ? document.getElementById('editAge').value : '';
+  const tag = document.getElementById('editTag').value.trim();
+  const responsible = document.getElementById('editResponsible').checked;
+  const avatar = isChild ? (gender==='menina' ? '👧' : '👦') : '🧑';
+
+  const btn = document.getElementById('saveEditBtn');
+  btn.disabled = true;
   setSyncing();
-  const { error } = await sb.from('guests').update({ status: s }).eq('id', g.id);
-  if(error){ console.error(error); setSyncError(); } else { setSynced(); }
-  showToast('Status atualizado!');
+
+  const payload = {
+    name, phone,
+    guest_type: type,
+    gender: isChild ? gender : null,
+    age: isChild && age ? parseInt(age) : null,
+    tag,
+    status: editStatusValue,
+    responsible: phone ? responsible : false,
+    avatar
+  };
+  const { error } = await sb.from('guests').update(payload).eq('id', g.id);
+  btn.disabled = false;
+
+  if(error){ console.error(error); setSyncError(); showToast('⚠️ Erro ao salvar alterações'); return; }
+
+  Object.assign(g, {
+    name, phone, type, gender: isChild?gender:'', age: isChild?age:'',
+    tag, status: editStatusValue, responsible: phone?responsible:false, avatar
+  });
+
+  closeEditModal();
+  renderGuests(); updateStats(); setSynced();
+  showToast('✅ Convidado atualizado!');
 }
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('statusModal').addEventListener('click',function(e){ if(e.target===this) closeModal(); });
+  document.getElementById('editModal').addEventListener('click',function(e){ if(e.target===this) closeEditModal(); });
   document.getElementById('msgChoiceModal').addEventListener('click',function(e){ if(e.target===this) closeMsgChoiceModal(); });
 });
 
@@ -1570,6 +1906,7 @@ function showTab(name, btn){
   document.getElementById('tab-'+name).classList.add('active');
   btn.classList.add('active');
   if(name==='messages') renderTemplates();
+  if(name==='summary') renderSummary();
 }
 
 // ════════════════════════════════════════════════════════════
