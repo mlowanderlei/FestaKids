@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FestaKids – Organizador de Festas Infantis</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;600;700;800&family=Fredoka+One&family=Boogaloo&family=Baloo+2:wght@700&family=Bubblegum+Sans&family=Pacifico&family=Righteous&family=Poppins:wght@700&family=Titan+One&family=Caveat:wght@700&display=swap');
+
+  :root {
+    --c1: #FF6B9D;
+    --c2: #C77DFF;
+    --yellow:  #FFD93D;
+    --mint:    #6BCB77;
+    --sky:     #4ECDC4;
+    --bg:      #FFF8F0;
+    --white:   #FFFFFF;
+    --dark:    #2D2D3A;
+    --muted:   #8B8BA0;
+    --card-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    --title-font: 'Baloo 2', cursive;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--dark); min-height: 100vh; }
+
+  /* ── AUTH SCREEN ── */
+  #authScreen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--c1) 0%, var(--c2) 100%);
+    padding: 24px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  #authScreen::before {
+    content: '🎈🎁🎂🎉🎊🦄🌈🎠🍭🧁';
+    position: absolute;
+    top: -10px; left: 0;
+    font-size: 48px;
+    opacity: 0.15;
+    letter-spacing: 14px;
+    white-space: nowrap;
+    width: 200%;
+    animation: slide 25s linear infinite;
+  }
+  .auth-card {
+    background: var(--white);
+    border-radius: 24px;
+    padding: 32px 24px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    position: relative;
+    z-index: 1;
+  }
+  .auth-logo { text-align: center; font-size: 48px; margin-bottom: 6px; }
+  .auth-title { font-family: var(--title-font); font-size: 28px; text-align: center; color: var(--dark); margin-bottom: 4px; }
+  .auth-subtitle { text-align: center; font-size: 13px; color: var(--muted); font-weight: 600; margin-bottom: 24px; }
+  .auth-field { margin-bottom: 14px; }
+  .auth-field label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 5px; }
+  .auth-field input {
+    width: 100%; padding: 12px 14px; border: 2px solid #EEEEF5;
+    border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 15px;
+    color: var(--dark); background: #FAFAFF; transition: border .2s;
+  }
+  .auth-field input:focus { outline: none; border-color: var(--c1); }
+  .auth-error {
+    background: #FDECEA; color: #E03E2D; border-radius: 10px; padding: 10px 12px;
+    font-size: 12px; font-weight: 700; margin-bottom: 14px; display: none;
+  }
+  .auth-error.show { display: block; }
+  .auth-success {
+    background: #E8F9EE; color: #2D9E52; border-radius: 10px; padding: 10px 12px;
+    font-size: 12px; font-weight: 700; margin-bottom: 14px; display: none;
+  }
+  .auth-success.show { display: block; }
+  .btn-auth {
+    width: 100%; padding: 13px; background: linear-gradient(135deg, var(--c1), var(--c2));
+    color: #fff; border: none; border-radius: 12px; font-family: 'Nunito', sans-serif;
+    font-weight: 800; font-size: 15px; cursor: pointer; transition: transform .15s, filter .15s;
+    margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-auth:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .btn-auth:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .auth-switch { text-align: center; margin-top: 18px; font-size: 13px; color: var(--muted); font-weight: 600; }
+  .auth-switch a { color: var(--c1); font-weight: 800; cursor: pointer; text-decoration: none; }
+  .auth-switch a:hover { text-decoration: underline; }
+  .auth-spinner {
+    width: 16px; height: 16px; border: 2.5px solid rgba(255,255,255,0.4);
+    border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .auth-loading-screen {
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: var(--bg); gap: 16px;
+  }
+  .auth-loading-screen .big-spinner {
+    width: 44px; height: 44px; border: 4px solid #EEEEF5; border-top-color: var(--c1);
+    border-radius: 50%; animation: spin .8s linear infinite;
+  }
+  .auth-loading-screen p { font-weight: 700; color: var(--muted); font-size: 14px; }
+
+  /* ── USER BAR (logged-in header strip) ── */
+  .user-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 16px; background: rgba(0,0,0,0.12); position: relative; z-index: 1;
+  }
+  .user-bar-email { font-size: 11px; color: rgba(255,255,255,0.9); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; }
+  .btn-logout {
+    background: rgba(255,255,255,0.2); color: #fff; border: none; border-radius: 8px;
+    padding: 5px 12px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 11px;
+    cursor: pointer; transition: background .2s; flex-shrink: 0; white-space: nowrap;
+  }
+  .btn-logout:hover { background: rgba(255,255,255,0.35); }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, var(--c1) 0%, var(--c2) 100%);
+    padding: 20px 24px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  #headerBanner {
+    position: absolute; top: -8px; left: 0;
+    font-size: 48px; opacity: 0.12; letter-spacing: 12px;
+    white-space: nowrap; width: 200%;
+    animation: slide 20s linear infinite; z-index: 0;
+  }
+  @keyframes slide { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  .header-inner {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 14px;
+  }
+  #headerLogo { font-size: 42px; }
+  .header-text h1 { font-family: var(--title-font); font-size: 28px; color: #fff; line-height: 1; }
+  .header-text p { color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 600; }
+
+  /* ── TABS ── */
+  .tabs { display: flex; margin-top: 18px; position: relative; z-index: 1; }
+  .tab-btn {
+    flex: 1; padding: 10px 4px; border: none;
+    background: rgba(255,255,255,0.18); color: rgba(255,255,255,0.75);
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 11px;
+    cursor: pointer; border-radius: 12px 12px 0 0; transition: all .2s;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+  }
+  .tab-btn span { font-size: 16px; }
+  .tab-btn.active { background: var(--bg); color: var(--dark); box-shadow: 0 -4px 12px rgba(0,0,0,0.08); }
+
+  /* ── MAIN ── */
+  main { padding: 20px 16px; max-width: 520px; margin: 0 auto; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── CARDS ── */
+  .card { background: var(--white); border-radius: 20px; padding: 20px; margin-bottom: 16px; box-shadow: var(--card-shadow); }
+  .card-title { font-family: var(--title-font); font-size: 18px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+
+  /* ── FORM FIELDS ── */
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .info-field label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 4px; }
+  .info-field input, .info-field textarea, .info-field select {
+    width: 100%; padding: 10px 12px; border: 2px solid #EEEEF5;
+    border-radius: 10px; font-family: 'Nunito', sans-serif; font-size: 14px;
+    color: var(--dark); transition: border .2s; background: #FAFAFF;
+  }
+  .info-field input:focus, .info-field textarea:focus, .info-field select:focus { outline: none; border-color: var(--c1); }
+  .info-field.full { grid-column: 1/-1; }
+
+  /* ── STATS ── */
+  .stats-bar { display: flex; gap: 10px; margin-bottom: 16px; }
+  .stat-chip { flex: 1; background: var(--white); border-radius: 16px; padding: 14px 10px; text-align: center; box-shadow: var(--card-shadow); }
+  .stat-chip .num { font-family: var(--title-font); font-size: 26px; line-height: 1; }
+  .stat-chip .lbl { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+  .stat-chip.s1 .num { color: var(--c1); }
+  .stat-chip.s2 .num { color: var(--mint); }
+  .stat-chip.s3 .num { color: var(--yellow); }
+
+  /* ── CHECKLIST ── */
+  .checklist-add { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .checklist-add input {
+    flex: 1 1 100%; padding: 10px 14px; border: 2px solid #EEEEF5;
+    border-radius: 10px; font-family: 'Nunito', sans-serif; font-size: 14px;
+    background: #FAFAFF; min-width: 0;
+  }
+  .checklist-add input:focus { outline: none; border-color: var(--sky); }
+  .cat-select { flex: 1 1 auto; min-width: 0; padding: 10px 8px; border: 2px solid #EEEEF5; border-radius: 10px; font-family: 'Nunito', sans-serif; font-size: 13px; background: #FAFAFF; color: var(--dark); }
+  .cat-select:focus { outline: none; border-color: var(--sky); }
+  .btn-add { padding: 10px 18px; background: var(--sky); color: #fff; border: none; border-radius: 10px; font-weight: 800; font-size: 20px; cursor: pointer; flex-shrink: 0; transition: transform .15s, filter .15s; }
+  .btn-add:hover { filter: brightness(1.1); transform: scale(1.05); }
+  .checklist-items { display: flex; flex-direction: column; gap: 8px; }
+  .check-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: #FAFAFF; border: 2px solid #EEEEF5; transition: all .2s; }
+  .check-item.done { background: #F0FFF4; border-color: #B7EFBF; }
+  .check-item.done .check-label { text-decoration: line-through; color: var(--muted); }
+  .check-box { width: 22px; height: 22px; border: 2.5px solid #DDD; border-radius: 6px; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all .2s; background: #fff; }
+  .check-item.done .check-box { background: var(--mint); border-color: var(--mint); color: #fff; }
+  .check-label { flex: 1; font-weight: 600; font-size: 14px; }
+  .check-cat { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+  .btn-del { background: none; border: none; font-size: 16px; cursor: pointer; opacity: 0.4; transition: opacity .2s; padding: 2px; }
+  .btn-del:hover { opacity: 1; }
+  .progress-bar-wrap { background: #EEEEF5; border-radius: 20px; height: 10px; margin-bottom: 16px; overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--mint), var(--sky)); border-radius: 20px; transition: width .4s ease; }
+  .progress-label { font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 6px; display: flex; justify-content: space-between; }
+
+  /* ── GUESTS ── */
+  .guest-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+  .guest-form .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .guest-form input, .guest-form select { flex: 1 1 120px; min-width: 0; padding: 10px 12px; border: 2px solid #EEEEF5; border-radius: 10px; font-family: 'Nunito', sans-serif; font-size: 14px; background: #FAFAFF; }
+  .guest-form input:focus, .guest-form select:focus { outline: none; border-color: var(--c1); }
+  #ageField { display: none; }
+  .responsible-check {
+    display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+    background: #F0FFF8; border: 2px solid #D4F4E2; border-radius: 10px;
+    font-size: 12px; font-weight: 700; color: #2D9E52; cursor: pointer;
+  }
+  .responsible-check input[type=checkbox] { width: 18px; height: 18px; accent-color: #25D366; flex-shrink: 0; cursor: pointer; }
+
+  .btn-primary { padding: 12px 20px; background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff; border: none; border-radius: 12px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 14px; cursor: pointer; transition: transform .15s, filter .15s; width: 100%; }
+  .btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .guest-list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+  .guest-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-chip { padding: 5px 12px; border-radius: 20px; border: 2px solid #EEEEF5; background: #fff; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12px; cursor: pointer; transition: all .2s; color: var(--muted); }
+  .filter-chip.active { background: var(--dark); color: #fff; border-color: var(--dark); }
+
+  .btn-export { padding: 8px 14px; background: #E8F9EE; color: #2D9E52; border: 2px solid #B7EFBF; border-radius: 12px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 12px; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .btn-export:hover { background: #2D9E52; color: #fff; border-color: #2D9E52; }
+  .responsible-legend { font-size: 10px; color: var(--muted); font-weight: 600; margin-bottom: 10px; }
+
+  .guest-list { display: flex; flex-direction: column; gap: 10px; }
+  .guest-card { padding: 14px; background: #FAFAFF; border-radius: 16px; border: 2px solid #EEEEF5; transition: border .2s; }
+  .guest-card:hover { border-color: #DDD; }
+  .guest-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .guest-info { flex: 1; min-width: 0; }
+  .guest-name { font-weight: 800; font-size: 17px; line-height: 1.25; color: var(--dark); word-break: break-word; }
+  .guest-sub { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: 2px; }
+  .guest-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .guest-actions { display: flex; gap: 6px; margin-left: auto; }
+  .status-badge { font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
+  .status-confirmed { background: #E8F9EE; color: #2D9E52; }
+  .status-pending   { background: #FFF8E1; color: #E6A817; }
+  .status-declined  { background: #FDECEA; color: #E03E2D; }
+  .btn-icon { width: 32px; height: 32px; border: none; border-radius: 8px; background: #EEEEF5; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+  .btn-icon:hover { background: #DDD; transform: scale(1.1); }
+  .btn-whatsapp { background: #E8F9F0; }
+  .btn-whatsapp:hover { background: #25D366; }
+
+  /* ── WHATSAPP ── */
+  .msg-templates { display: flex; flex-direction: column; gap: 12px; }
+  .msg-card { border: 2px solid #EEEEF5; border-radius: 16px; padding: 14px; background: #fff; }
+  .msg-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .msg-type { font-weight: 800; font-size: 13px; flex: 1; }
+  .msg-preview { background: #E8F5E9; border-radius: 12px 12px 12px 4px; padding: 10px 12px; font-size: 13px; line-height: 1.5; color: #1A3A1A; margin-bottom: 10px; white-space: pre-wrap; }
+  .msg-actions { display: flex; gap: 8px; }
+  .btn-sm { flex: 1; padding: 8px 12px; border-radius: 10px; border: none; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12px; cursor: pointer; transition: all .2s; }
+  .btn-sm:hover { filter: brightness(1.1); }
+  .btn-green { background: #25D366; color: #fff; }
+  .btn-outline { background: #EEEEF5; color: var(--dark); }
+
+  .msg-group-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .group-select {
+    flex: 1 1 auto; min-width: 0; padding: 8px 10px; border: 2px solid #EEEEF5;
+    border-radius: 10px; font-family: 'Nunito', sans-serif; font-size: 12px;
+    font-weight: 700; background: #FAFAFF; color: var(--dark);
+  }
+  .group-select:focus { outline: none; border-color: var(--sky); }
+  .btn-bulk {
+    flex-shrink: 0; padding: 8px 14px; background: #25D366; color: #fff; border: none;
+    border-radius: 10px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 12px;
+    cursor: pointer; transition: filter .2s; white-space: nowrap;
+  }
+  .btn-bulk:hover { filter: brightness(1.1); }
+  .group-count { font-size: 10px; color: var(--muted); font-weight: 700; margin-bottom: 8px; }
+
+  .whatsapp-send-all { background: linear-gradient(135deg, #25D366, #128C7E); border-radius: 20px; padding: 20px; color: white; text-align: center; margin-bottom: 16px; }
+  .whatsapp-send-all h3 { font-family: var(--title-font); font-size: 20px; margin-bottom: 6px; }
+  .whatsapp-send-all p { font-size: 13px; opacity: .9; margin-bottom: 0; }
+  .btn-wa-big { background: white; color: #25D366; border: none; padding: 12px 24px; border-radius: 14px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 14px; cursor: pointer; transition: transform .15s; }
+  .btn-wa-big:hover { transform: scale(1.04); }
+
+  /* ── EMPTY ── */
+  .empty { text-align: center; padding: 30px 20px; color: var(--muted); }
+  .empty .emoji { font-size: 48px; margin-bottom: 10px; }
+  .empty p { font-weight: 700; font-size: 14px; }
+
+  /* ── MODAL ── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; align-items: flex-end; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--white); border-radius: 28px 28px 0 0; padding: 24px 20px 32px; width: 100%; max-width: 520px; animation: slideUp .25s ease; max-height: 85vh; overflow-y: auto; }
+  @keyframes slideUp { from{transform:translateY(60px);opacity:0} to{transform:translateY(0);opacity:1} }
+  .modal-title { font-family: var(--title-font); font-size: 20px; margin-bottom: 16px; text-align: center; }
+  .status-options { display: flex; gap: 10px; }
+  .status-opt { flex: 1; padding: 14px 8px; border-radius: 14px; border: 2.5px solid #EEEEF5; text-align: center; cursor: pointer; font-weight: 700; font-size: 13px; transition: all .2s; }
+  .status-opt .ico { font-size: 22px; display: block; margin-bottom: 4px; }
+  .status-opt:hover { border-color: var(--c1); }
+  .status-opt.sel-confirmed { border-color: var(--mint); background: #F0FFF4; color: #2D9E52; }
+  .status-opt.sel-pending   { border-color: var(--yellow); background: #FFFDE7; color: #E6A817; }
+  .status-opt.sel-declined  { border-color: var(--c1); background: #FFF0F0; color: #E03E2D; }
+  .btn-close-modal { width: 100%; margin-top: 16px; padding: 12px; border-radius: 12px; border: 2px solid #EEEEF5; background: none; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; color: var(--muted); }
+
+  .msg-choice-list { display: flex; flex-direction: column; gap: 10px; max-height: 50vh; overflow-y: auto; }
+  .msg-choice-opt {
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+    border: 2px solid #EEEEF5; border-radius: 14px; cursor: pointer;
+    transition: all .2s; background: #FAFAFF;
+  }
+  .msg-choice-opt:hover { border-color: var(--c1); background: #fff0f5; }
+  .msg-choice-opt .ico { font-size: 24px; flex-shrink: 0; }
+  .msg-choice-text { min-width: 0; flex: 1; }
+  .msg-choice-title { font-weight: 800; font-size: 14px; color: var(--dark); }
+  .msg-choice-snippet { font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+
+  /* ── TOAST ── */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--dark); color: #fff; padding: 12px 20px; border-radius: 30px; font-weight: 700; font-size: 13px; z-index: 200; transition: transform .3s cubic-bezier(.34,1.56,.64,1); white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── SETTINGS ── */
+  .settings-preview { background: linear-gradient(135deg, var(--c1), var(--c2)); border-radius: 16px; padding: 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; overflow: hidden; position: relative; }
+  .settings-preview::before { content: attr(data-banner); position: absolute; top: -6px; left: 0; font-size: 36px; opacity: 0.15; letter-spacing: 10px; white-space: nowrap; }
+  #previewLogo { font-size: 36px; position: relative; z-index: 1; }
+  #previewTitle { font-size: 22px; color: #fff; position: relative; z-index: 1; font-family: var(--title-font); }
+
+  .account-row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: #FAFAFF; border-radius: 12px; border: 2px solid #EEEEF5; margin-bottom: 12px; }
+  .account-row .ico { font-size: 22px; }
+  .account-row .info { flex: 1; min-width: 0; }
+  .account-row .email-text { font-weight: 800; font-size: 13px; word-break: break-all; }
+  .account-row .label-text { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+  .btn-logout-settings {
+    width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #FDECEA;
+    background: none; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 13px;
+    cursor: pointer; color: #E03E2D; transition: background .2s;
+  }
+  .btn-logout-settings:hover { background: #fdecea; }
+
+  /* Theme picker */
+  .theme-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .theme-opt {
+    border: 2.5px solid #EEEEF5; border-radius: 16px; padding: 14px 8px;
+    cursor: pointer; text-align: center; transition: all .2s; background: #FAFAFF;
+  }
+  .theme-opt:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .theme-opt.selected { border-color: var(--dark); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .theme-swatch { width: 100%; height: 36px; border-radius: 10px; margin-bottom: 8px; }
+  .theme-label { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+
+  /* Font grid */
+  .font-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .font-option { border: 2.5px solid #EEEEF5; border-radius: 14px; padding: 14px 12px; cursor: pointer; transition: all .2s; background: #FAFAFF; text-align: center; }
+  .font-option:hover { border-color: var(--c2); background: #faf0ff; }
+  .font-option.selected { border-color: var(--c2); background: #f5e8ff; }
+  .font-preview { font-size: 20px; line-height: 1.2; margin-bottom: 4px; color: var(--dark); }
+  .font-name { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+
+  /* Emoji grid */
+  .emoji-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 12px; }
+  .emoji-opt { font-size: 26px; text-align: center; padding: 8px 4px; border-radius: 12px; border: 2.5px solid #EEEEF5; cursor: pointer; transition: all .2s; background: #FAFAFF; line-height: 1; }
+  .emoji-opt:hover { border-color: var(--c1); background: #fff0f5; transform: scale(1.1); }
+  .emoji-opt.selected { border-color: var(--c1); background: #ffe0ec; }
+
+  /* Banner */
+  .banner-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+  .banner-presets { display: flex; flex-direction: column; gap: 8px; }
+  .banner-opt { border: 2.5px solid #EEEEF5; border-radius: 12px; padding: 10px 14px; cursor: pointer; font-size: 20px; letter-spacing: 6px; background: #FAFAFF; transition: all .2s; overflow: hidden; white-space: nowrap; }
+  .banner-opt:hover { border-color: var(--sky); background: #e8fffe; }
+  .banner-opt.selected { border-color: var(--sky); background: #d4f7f5; }
+  .banner-custom-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
+  .banner-custom-input { flex: 1 1 140px; min-width: 0; padding: 10px 12px; border: 2px solid #EEEEF5; border-radius: 10px; font-size: 18px; font-family: 'Nunito', sans-serif; background: #FAFAFF; }
+  .banner-custom-input:focus { outline: none; border-color: var(--sky); }
+  .btn-apply { padding: 10px 16px; background: var(--sky); color: #fff; border: none; border-radius: 10px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px; cursor: pointer; white-space: nowrap; transition: filter .2s; flex-shrink: 0; }
+  .btn-apply:hover { filter: brightness(1.1); }
+
+  .btn-reset { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #FDECEA; background: none; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 13px; cursor: pointer; color: #E03E2D; transition: background .2s; margin-top: 4px; }
+  .btn-reset:hover { background: #fdecea; }
+
+  .sync-indicator {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 10px;
+    color: var(--muted); font-weight: 700;
+  }
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); flex-shrink: 0; }
+  .sync-dot.syncing { background: var(--yellow); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+</style>
+</head>
+<body>
+<!-- ════════════════════════════════════════════════════════════
+     TELA DE LOGIN / CADASTRO
+═════════════════════════════════════════════════════════════ -->
+<div id="authLoadingScreen" class="auth-loading-screen">
+  <div class="big-spinner"></div>
+  <p>Carregando…</p>
+</div>
+
+<div id="authScreen" class="auth-screen" style="display:none">
+  <div class="auth-card">
+    <div class="auth-logo">🎂</div>
+    <div class="auth-title">FestaKids</div>
+    <div class="auth-subtitle" id="authSubtitle">Entre para organizar sua festa</div>
+
+    <div class="auth-error" id="authError"></div>
+    <div class="auth-success" id="authSuccess"></div>
+
+    <form id="authForm" onsubmit="return false;">
+      <div class="auth-field">
+        <label>E-mail</label>
+        <input type="email" id="authEmail" placeholder="seuemail@exemplo.com" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label>Senha</label>
+        <input type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <div class="auth-field" id="authConfirmField" style="display:none">
+        <label>Confirmar senha</label>
+        <input type="password" id="authPasswordConfirm" placeholder="••••••••" autocomplete="new-password">
+      </div>
+
+      <button class="btn-auth" id="authSubmitBtn" onclick="handleAuthSubmit()">
+        <span id="authSubmitText">Entrar</span>
+      </button>
+    </form>
+
+    <div class="auth-switch">
+      <span id="authSwitchText">Não tem conta?</span>
+      <a id="authSwitchLink" onclick="toggleAuthMode()">Criar conta</a>
+    </div>
+    <div class="auth-switch" id="forgotPasswordRow" style="margin-top:8px">
+      <a onclick="handleForgotPassword()">Esqueci minha senha</a>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     APP PRINCIPAL (visível só após login)
+═════════════════════════════════════════════════════════════ -->
+<div id="appRoot" style="display:none">
+
+<header>
+  <div id="headerBanner"></div>
+  <div class="user-bar">
+    <span class="user-bar-email" id="userBarEmail"></span>
+    <span class="sync-indicator" id="syncIndicator"><span class="sync-dot" id="syncDot"></span><span id="syncText">Salvo</span></span>
+    <button class="btn-logout" onclick="handleLogout()">Sair</button>
+  </div>
+  <div class="header-inner">
+    <div id="headerLogo">🎂</div>
+    <div class="header-text">
+      <h1 id="headerTitle">FestaKids</h1>
+      <p>Organizador de Festas Infantis</p>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('info',this)"><span>🏠</span>Festa</button>
+    <button class="tab-btn" onclick="showTab('checklist',this)"><span>✅</span>Checklist</button>
+    <button class="tab-btn" onclick="showTab('guests',this)"><span>👥</span>Convidados</button>
+    <button class="tab-btn" onclick="showTab('messages',this)"><span>💬</span>WhatsApp</button>
+    <button class="tab-btn" onclick="showTab('settings',this)"><span>⚙️</span>Config</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- FESTA -->
+  <div id="tab-info" class="section active">
+    <div class="stats-bar">
+      <div class="stat-chip s1"><div class="num" id="statDays">–</div><div class="lbl">dias p/ festa</div></div>
+      <div class="stat-chip s2"><div class="num" id="statConfirmed">0</div><div class="lbl">confirmados</div></div>
+      <div class="stat-chip s3"><div class="num" id="statTasks">0%</div><div class="lbl">tarefas feitas</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🎉 Dados da Festa</div>
+      <div class="info-grid">
+        <div class="info-field full"><label>Nome da criança</label><input type="text" id="partyChild" placeholder="Ex: Sofia" oninput="saveInfo()"></div>
+        <div class="info-field full"><label>Tema da festa</label><input type="text" id="partyTheme" placeholder="Ex: Unicórnio, Dinossauro…" oninput="saveInfo()"></div>
+        <div class="info-field"><label>Data</label><input type="date" id="partyDate" oninput="saveInfo();updateDaysCount()"></div>
+        <div class="info-field"><label>Horário</label><input type="time" id="partyTime" oninput="saveInfo()"></div>
+        <div class="info-field full"><label>Local</label><input type="text" id="partyPlace" placeholder="Ex: Rua das Flores, 42 – Salão Jardim" oninput="saveInfo()"></div>
+        <div class="info-field"><label>Orçamento (R$)</label><input type="number" id="partyBudget" placeholder="0,00" oninput="saveInfo()"></div>
+        <div class="info-field"><label>Nº esperado de crianças</label><input type="number" id="partyKids" placeholder="0" oninput="saveInfo()"></div>
+        <div class="info-field full"><label>Observações</label><textarea id="partyNotes" rows="3" placeholder="Alergias, pedidos especiais…" oninput="saveInfo()"></textarea></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div id="tab-checklist" class="section">
+    <div class="card">
+      <div class="card-title">✅ Checklist da Festa</div>
+      <div class="progress-label"><span>Progresso</span><span id="progressText">0 de 0 tarefas</span></div>
+      <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+      <div class="checklist-add">
+        <input type="text" id="newTask" placeholder="Adicionar tarefa…" onkeydown="if(event.key==='Enter')addTask()">
+        <select class="cat-select" id="newTaskCat">
+          <option value="Decoração">🎨 Decor</option>
+          <option value="Comida">🍰 Comida</option>
+          <option value="Convite">💌 Convite</option>
+          <option value="Entretenimento">🎪 Diversão</option>
+          <option value="Logística">📦 Logística</option>
+          <option value="Outro">📌 Outro</option>
+        </select>
+        <button class="btn-add" onclick="addTask()">+</button>
+      </div>
+      <div class="checklist-items" id="checklistItems"></div>
+    </div>
+  </div>
+
+  <!-- CONVIDADOS -->
+  <div id="tab-guests" class="section">
+    <div class="card">
+      <div class="card-title">👤 Adicionar Convidado</div>
+      <div class="guest-form">
+        <div class="row">
+          <input type="text" id="guestName" placeholder="Nome do convidado">
+          <input type="tel" id="guestPhone" placeholder="WhatsApp (ex: 11999999999)">
+        </div>
+        <div class="row">
+          <select id="guestType" onchange="toggleAgeField()">
+            <option value="adulto">🧑 Adulto</option>
+            <option value="crianca">🧒 Criança</option>
+          </select>
+          <select id="guestGender" style="display:none">
+            <option value="menina">👧 Menina</option>
+            <option value="menino">👦 Menino</option>
+          </select>
+          <input type="number" id="guestAge" placeholder="Idade (anos)" min="0" max="17" style="display:none">
+        </div>
+        <div class="row">
+          <select id="guestStatus">
+            <option value="pending">⏳ Aguardando</option>
+            <option value="confirmed">✅ Confirmado</option>
+            <option value="declined">❌ Não vem</option>
+          </select>
+        </div>
+        <label class="responsible-check">
+          <input type="checkbox" id="guestResponsible" checked>
+          <span>📲 Responsável pelo WhatsApp (recebe as mensagens da família)</span>
+        </label>
+        <button class="btn-primary" id="addGuestBtn" onclick="addGuest()">➕ Adicionar Convidado</button>
+      </div>
+    </div>
+
+    <div class="guest-list-header">
+      <div class="guest-filters">
+        <button class="filter-chip active" onclick="filterGuests('all',this)">Todos</button>
+        <button class="filter-chip" onclick="filterGuests('confirmed',this)">✅ Confirmados</button>
+        <button class="filter-chip" onclick="filterGuests('pending',this)">⏳ Aguardando</button>
+        <button class="filter-chip" onclick="filterGuests('declined',this)">❌ Não vêm</button>
+      </div>
+      <button class="btn-export" onclick="exportGuests()">📊 Exportar planilha</button>
+    </div>
+
+    <div class="responsible-legend">⭐ = recebe mensagens em massa &nbsp;·&nbsp; ☆ = não recebe (clique na estrela para alternar)</div>
+
+    <div class="guest-list" id="guestList">
+      <div class="empty"><div class="emoji">🎈</div><p>Nenhum convidado ainda.</p></div>
+    </div>
+  </div>
+
+  <!-- WHATSAPP -->
+  <div id="tab-messages" class="section">
+    <div class="whatsapp-send-all">
+      <h3>💬 Mensagens no WhatsApp</h3>
+      <p>Escolha um modelo, selecione o grupo de convidados e envie em massa.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">✍️ Mensagem Personalizada</div>
+      <textarea id="customMsgInput" rows="5" placeholder="Escreva sua própria mensagem aqui… Use [nome] para inserir o nome do convidado automaticamente." oninput="renderCustomPreview()" style="width:100%;padding:10px 12px;border:2px solid #EEEEF5;border-radius:10px;font-family:'Nunito',sans-serif;font-size:14px;background:#FAFAFF;resize:vertical;margin-bottom:10px"></textarea>
+      <div id="customMsgCard"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💬 Modelos de Mensagem</div>
+      <div class="msg-templates" id="msgTemplates"></div>
+    </div>
+  </div>
+
+  <!-- CONFIGURAÇÕES -->
+  <div id="tab-settings" class="section">
+
+    <div class="settings-preview" id="settingsPreview" data-banner="🎈🎁🎂🎉🎊">
+      <div id="previewLogo">🎂</div>
+      <div id="previewTitle">FestaKids</div>
+    </div>
+
+    <!-- Conta -->
+    <div class="card">
+      <div class="card-title">👤 Sua Conta</div>
+      <div class="account-row">
+        <span class="ico">📧</span>
+        <div class="info">
+          <div class="email-text" id="accountEmail">—</div>
+          <div class="label-text">Conectado</div>
+        </div>
+      </div>
+      <button class="btn-logout-settings" onclick="handleLogout()">🚪 Sair da conta</button>
+    </div>
+
+    <!-- Título da página -->
+    <div class="card">
+      <div class="card-title">📝 Título da Página</div>
+      <div class="banner-custom-wrap">
+        <input type="text" class="banner-custom-input" id="titleInput" placeholder="Ex: Festa da Sofia" maxlength="30" style="font-size:14px" oninput="updateTitlePreview()">
+        <button class="btn-apply" onclick="applyTitle()">Aplicar</button>
+      </div>
+    </div>
+
+    <!-- Tema de cores -->
+    <div class="card">
+      <div class="card-title">🎨 Tema de Cores</div>
+      <div class="theme-grid" id="themeGrid"></div>
+    </div>
+
+    <!-- Fonte -->
+    <div class="card">
+      <div class="card-title">🔤 Fonte dos Títulos</div>
+      <div class="font-grid" id="fontGrid"></div>
+    </div>
+
+    <!-- Logo -->
+    <div class="card">
+      <div class="card-title">✨ Emoji do Logo</div>
+      <div class="emoji-grid" id="logoEmojiGrid"></div>
+    </div>
+
+    <!-- Banner -->
+    <div class="card">
+      <div class="card-title">🎊 Emojis do Cabeçalho</div>
+      <div class="banner-label">Escolha um conjunto</div>
+      <div class="banner-presets" id="bannerPresets"></div>
+      <div class="banner-custom-wrap">
+        <input type="text" class="banner-custom-input" id="bannerCustomInput" placeholder="Cole seus emojis aqui…" maxlength="30">
+        <button class="btn-apply" onclick="applyCustomBanner()">Aplicar</button>
+      </div>
+    </div>
+
+    <button class="btn-reset" onclick="resetSettings()">🔄 Restaurar configurações padrão</button>
+  </div>
+
+</main>
+
+<!-- MODAL STATUS -->
+<div class="modal-overlay" id="statusModal">
+  <div class="modal">
+    <div class="modal-title" id="modalGuestName">Atualizar presença</div>
+    <div class="status-options">
+      <div class="status-opt" id="optConfirmed" onclick="setStatus('confirmed')"><span class="ico">✅</span>Confirmado</div>
+      <div class="status-opt" id="optPending"   onclick="setStatus('pending')"><span class="ico">⏳</span>Aguardando</div>
+      <div class="status-opt" id="optDeclined"  onclick="setStatus('declined')"><span class="ico">❌</span>Não vem</div>
+    </div>
+    <button class="btn-close-modal" onclick="closeModal()">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL ESCOLHA DE MENSAGEM -->
+<div class="modal-overlay" id="msgChoiceModal">
+  <div class="modal">
+    <div class="modal-title" id="msgChoiceGuestName">Enviar mensagem</div>
+    <div class="msg-choice-list" id="msgChoiceOptions"></div>
+    <button class="btn-close-modal" onclick="closeMsgChoiceModal()">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+</div> <!-- /#appRoot -->
+<script>
+// ════════════════════════════════════════════════════════════
+// SUPABASE CONFIG
+// ════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://wjmucxbzdfdpggciqdlk.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_1y5wn3hp8TfBOU6xMRpQLA_aWFyVhpk';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let currentPartyId = null;
+
+// ════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════
+let partyInfo = {};
+let tasks = [];
+let guests = [];
+let guestFilter = 'all';
+let editingGuestId = null;
+let appSettings = { title:'FestaKids', font:'Baloo 2', logo:'🎂', banner:'🎈🎁🎂🎉🎊', theme:'menina' };
+
+const CAT_COLORS = {'Decoração':'#FF6B9D','Comida':'#FFD93D','Convite':'#C77DFF','Entretenimento':'#4ECDC4','Logística':'#6BCB77','Outro':'#8B8BA0'};
+
+const THEMES = [
+  { id:'menina', label:'👧 Menina', c1:'#FF6B9D', c2:'#C77DFF', bg:'#FFF8F0', gradient:'linear-gradient(135deg,#FF6B9D,#C77DFF)' },
+  { id:'menino', label:'👦 Menino', c1:'#3B82F6', c2:'#06B6D4', bg:'#F0F7FF', gradient:'linear-gradient(135deg,#3B82F6,#06B6D4)' },
+  { id:'neutro', label:'🌈 Neutro', c1:'#F97316', c2:'#EAB308', bg:'#FFFBF0', gradient:'linear-gradient(135deg,#F97316,#EAB308)' }
+];
+
+const FONTS = [
+  {name:'Lilita One'},{name:'Fredoka One'},{name:'Boogaloo'},{name:'Baloo 2'},
+  {name:'Bubblegum Sans'},{name:'Pacifico'},{name:'Righteous'},{name:'Titan One'},
+  {name:'Caveat'},{name:'Poppins'}
+];
+
+const LOGO_EMOJIS = ['🎂','🎉','🎈','🎊','🦄','🌟','🎠','🍭','🧁','🎁','🎪','🦋','🐬','🦁','🌈','🎯','🚀','💫','🎶','🪄','🏰','💎'];
+const BANNER_PRESETS = ['🎈🎁🎂🎉🎊','🦄🌟💫✨🌈','🍭🧁🍰🎂🍬','🎠🎡🎢🎪🎭','🐬🦋🐼🦁🐸','⭐🌙☁️🌈🌸'];
+
+const defaultTasks = [
+  {cat:'Convite',text:'Definir lista de convidados'},
+  {cat:'Convite',text:'Criar e enviar convites'},
+  {cat:'Decoração',text:'Escolher tema da festa'},
+  {cat:'Decoração',text:'Comprar balões e enfeites'},
+  {cat:'Decoração',text:'Montar cenário para fotos'},
+  {cat:'Comida',text:'Encomendar o bolo'},
+  {cat:'Comida',text:'Definir cardápio de salgados'},
+  {cat:'Comida',text:'Comprar bebidas e sucos'},
+  {cat:'Entretenimento',text:'Contratar animador/animadora'},
+  {cat:'Entretenimento',text:'Preparar brincadeiras e jogos'},
+  {cat:'Logística',text:'Confirmar local da festa'},
+  {cat:'Logística',text:'Preparar sacolas de lembrança'},
+];
+
+// ════════════════════════════════════════════════════════════
+// AUTH STATE / BOOTSTRAP
+// ════════════════════════════════════════════════════════════
+let authMode = 'login'; // 'login' | 'signup'
+
+async function bootstrap(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(session && session.user){
+    currentUser = session.user;
+    await enterApp();
+  } else {
+    showAuthScreen();
+  }
+
+  sb.auth.onAuthStateChange((event, session) => {
+    if(event === 'SIGNED_IN' && session && (!currentUser || currentUser.id !== session.user.id)){
+      currentUser = session.user;
+      enterApp();
+    } else if(event === 'SIGNED_OUT'){
+      currentUser = null;
+      currentPartyId = null;
+      showAuthScreen();
+    }
+  });
+}
+
+function showAuthScreen(){
+  document.getElementById('authLoadingScreen').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('appRoot').style.display = 'none';
+}
+
+async function enterApp(){
+  document.getElementById('authLoadingScreen').style.display = 'flex';
+  document.getElementById('authScreen').style.display = 'none';
+
+  document.getElementById('userBarEmail').textContent = currentUser.email;
+  document.getElementById('accountEmail').textContent = currentUser.email;
+
+  await loadAllData();
+
+  document.getElementById('authLoadingScreen').style.display = 'none';
+  document.getElementById('appRoot').style.display = 'block';
+
+  renderTasks();
+  renderGuests();
+  renderTemplates();
+  updateStats();
+  updateDaysCount();
+  applySettings();
+  buildSettingsUI();
+  toggleAgeField();
+}
+
+// ════════════════════════════════════════════════════════════
+// AUTH UI HANDLERS
+// ════════════════════════════════════════════════════════════
+function toggleAuthMode(){
+  authMode = authMode === 'login' ? 'signup' : 'login';
+  hideAuthMessages();
+  if(authMode === 'signup'){
+    document.getElementById('authSubtitle').textContent = 'Crie sua conta gratuita';
+    document.getElementById('authConfirmField').style.display = 'block';
+    document.getElementById('authSubmitText').textContent = 'Criar conta';
+    document.getElementById('authSwitchText').textContent = 'Já tem conta?';
+    document.getElementById('authSwitchLink').textContent = 'Entrar';
+    document.getElementById('forgotPasswordRow').style.display = 'none';
+  } else {
+    document.getElementById('authSubtitle').textContent = 'Entre para organizar sua festa';
+    document.getElementById('authConfirmField').style.display = 'none';
+    document.getElementById('authSubmitText').textContent = 'Entrar';
+    document.getElementById('authSwitchText').textContent = 'Não tem conta?';
+    document.getElementById('authSwitchLink').textContent = 'Criar conta';
+    document.getElementById('forgotPasswordRow').style.display = 'block';
+  }
+}
+
+function hideAuthMessages(){
+  document.getElementById('authError').classList.remove('show');
+  document.getElementById('authSuccess').classList.remove('show');
+}
+function showAuthError(msg){
+  hideAuthMessages();
+  const el = document.getElementById('authError');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function showAuthSuccess(msg){
+  hideAuthMessages();
+  const el = document.getElementById('authSuccess');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function setAuthLoading(loading){
+  const btn = document.getElementById('authSubmitBtn');
+  btn.disabled = loading;
+  btn.innerHTML = loading
+    ? '<span class="auth-spinner"></span>'
+    : `<span id="authSubmitText">${authMode==='login'?'Entrar':'Criar conta'}</span>`;
+}
+
+async function handleAuthSubmit(){
+  hideAuthMessages();
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+
+  if(!email || !password){
+    showAuthError('⚠️ Preencha e-mail e senha.');
+    return;
+  }
+  if(password.length < 6){
+    showAuthError('⚠️ A senha precisa ter pelo menos 6 caracteres.');
+    return;
+  }
+
+  if(authMode === 'signup'){
+    const confirm = document.getElementById('authPasswordConfirm').value;
+    if(password !== confirm){
+      showAuthError('⚠️ As senhas não coincidem.');
+      return;
+    }
+    setAuthLoading(true);
+    const { data, error } = await sb.auth.signUp({ email, password });
+    setAuthLoading(false);
+    if(error){
+      showAuthError(translateAuthError(error.message));
+      return;
+    }
+    if(data.session){
+      // auto-confirm is on, user is logged in immediately
+      currentUser = data.user;
+      await enterApp();
+    } else {
+      showAuthSuccess('✅ Conta criada! Verifique seu e-mail para confirmar antes de entrar.');
+    }
+  } else {
+    setAuthLoading(true);
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    setAuthLoading(false);
+    if(error){
+      showAuthError(translateAuthError(error.message));
+      return;
+    }
+    currentUser = data.user;
+    await enterApp();
+  }
+}
+
+function translateAuthError(msg){
+  const map = {
+    'Invalid login credentials': 'E-mail ou senha incorretos.',
+    'User already registered': 'Já existe uma conta com esse e-mail.',
+    'Email not confirmed': 'Confirme seu e-mail antes de entrar.',
+    'Password should be at least 6 characters': 'A senha precisa ter pelo menos 6 caracteres.',
+  };
+  return map[msg] || ('⚠️ ' + msg);
+}
+
+async function handleForgotPassword(){
+  const email = document.getElementById('authEmail').value.trim();
+  if(!email){
+    showAuthError('⚠️ Digite seu e-mail acima primeiro, depois clique em "Esqueci minha senha".');
+    return;
+  }
+  const { error } = await sb.auth.resetPasswordForEmail(email);
+  if(error){
+    showAuthError(translateAuthError(error.message));
+  } else {
+    showAuthSuccess('📧 Enviamos um link de redefinição de senha para seu e-mail.');
+  }
+}
+
+async function handleLogout(){
+  await sb.auth.signOut();
+  // onAuthStateChange handles UI swap
+}
+
+// ════════════════════════════════════════════════════════════
+// SYNC INDICATOR
+// ════════════════════════════════════════════════════════════
+let syncTimeout = null;
+function setSyncing(){
+  document.getElementById('syncDot').classList.add('syncing');
+  document.getElementById('syncText').textContent = 'Salvando…';
+}
+function setSynced(){
+  document.getElementById('syncDot').classList.remove('syncing');
+  document.getElementById('syncText').textContent = 'Salvo';
+}
+function setSyncError(){
+  document.getElementById('syncDot').classList.remove('syncing');
+  document.getElementById('syncDot').style.background = '#E03E2D';
+  document.getElementById('syncText').textContent = 'Erro ao salvar';
+}
+
+// ════════════════════════════════════════════════════════════
+// DATA LOADING (Supabase → app state)
+// ════════════════════════════════════════════════════════════
+async function loadAllData(){
+  // 1) Party (get most recent, or create one)
+  const { data: parties, error: partiesErr } = await sb
+    .from('parties')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: true })
+    .limit(1);
+
+  if(partiesErr){ console.error(partiesErr); }
+
+  if(parties && parties.length > 0){
+    const p = parties[0];
+    currentPartyId = p.id;
+    partyInfo = {
+      child: p.child_name || '',
+      theme: p.theme || '',
+      date: p.party_date || '',
+      time: p.party_time ? p.party_time.slice(0,5) : '',
+      place: p.place || '',
+      budget: p.budget != null ? String(p.budget) : '',
+      kids: p.expected_kids != null ? String(p.expected_kids) : '',
+      notes: p.notes || ''
+    };
+  } else {
+    // create a default party row for this user
+    const { data: created, error: createErr } = await sb
+      .from('parties')
+      .insert({ user_id: currentUser.id })
+      .select()
+      .single();
+    if(createErr){ console.error(createErr); }
+    else {
+      currentPartyId = created.id;
+      partyInfo = {};
+    }
+  }
+  restoreInfo();
+
+  // 2) Tasks
+  const { data: taskRows, error: taskErr } = await sb
+    .from('tasks')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: true });
+
+  if(taskErr){ console.error(taskErr); }
+
+  if(taskRows && taskRows.length > 0){
+    tasks = taskRows.map(r => ({ id:r.id, text:r.text, cat:r.category, done:r.done }));
+  } else {
+    // seed default checklist for new users
+    const seeded = defaultTasks.map(t => ({
+      user_id: currentUser.id, party_id: currentPartyId, text: t.text, category: t.cat, done: false
+    }));
+    const { data: insertedTasks, error: seedErr } = await sb.from('tasks').insert(seeded).select();
+    if(seedErr){ console.error(seedErr); tasks = []; }
+    else { tasks = insertedTasks.map(r => ({ id:r.id, text:r.text, cat:r.category, done:r.done })); }
+  }
+
+  // 3) Guests
+  const { data: guestRows, error: guestErr } = await sb
+    .from('guests')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: true });
+
+  if(guestErr){ console.error(guestErr); guests = []; }
+  else {
+    guests = (guestRows || []).map(r => ({
+      id: r.id, name: r.name, phone: r.phone || '', type: r.guest_type,
+      gender: r.gender || '', age: r.age != null ? String(r.age) : '',
+      status: r.status, responsible: r.responsible, avatar: r.avatar || '🧑'
+    }));
+  }
+
+  // 4) Settings
+  const { data: settingsRow, error: settingsErr } = await sb
+    .from('app_settings')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .maybeSingle();
+
+  if(settingsErr){ console.error(settingsErr); }
+
+  if(settingsRow){
+    appSettings = {
+      title: settingsRow.title || 'FestaKids',
+      font: settingsRow.font || 'Baloo 2',
+      logo: settingsRow.logo || '🎂',
+      banner: settingsRow.banner || '🎈🎁🎂🎉🎊',
+      theme: settingsRow.theme || 'menina'
+    };
+  } else {
+    // shouldn't normally happen (trigger creates it), but just in case
+    await sb.from('app_settings').upsert({ user_id: currentUser.id, ...defaultSettingsPayload() });
+  }
+}
+
+function defaultSettingsPayload(){
+  return { title:'FestaKids', font:'Baloo 2', logo:'🎂', banner:'🎈🎁🎂🎉🎊', theme:'menina' };
+}
+
+// ════════════════════════════════════════════════════════════
+// PARTY INFO (Supabase persistence)
+// ════════════════════════════════════════════════════════════
+let savePartyDebounce = null;
+function saveInfo(){
+  partyInfo = {
+    child:  document.getElementById('partyChild').value,
+    theme:  document.getElementById('partyTheme').value,
+    date:   document.getElementById('partyDate').value,
+    time:   document.getElementById('partyTime').value,
+    place:  document.getElementById('partyPlace').value,
+    budget: document.getElementById('partyBudget').value,
+    kids:   document.getElementById('partyKids').value,
+    notes:  document.getElementById('partyNotes').value,
+  };
+  clearTimeout(savePartyDebounce);
+  setSyncing();
+  savePartyDebounce = setTimeout(persistPartyInfo, 600);
+}
+async function persistPartyInfo(){
+  if(!currentPartyId) return;
+  const payload = {
+    child_name: partyInfo.child || '',
+    theme: partyInfo.theme || '',
+    party_date: partyInfo.date || null,
+    party_time: partyInfo.time || null,
+    place: partyInfo.place || '',
+    budget: partyInfo.budget ? Number(partyInfo.budget) : null,
+    expected_kids: partyInfo.kids ? parseInt(partyInfo.kids) : null,
+    notes: partyInfo.notes || ''
+  };
+  const { error } = await sb.from('parties').update(payload).eq('id', currentPartyId);
+  if(error){ console.error(error); setSyncError(); }
+  else { setSynced(); }
+}
+function restoreInfo(){
+  document.getElementById('partyChild').value  = partyInfo.child  ||'';
+  document.getElementById('partyTheme').value  = partyInfo.theme  ||'';
+  document.getElementById('partyDate').value   = partyInfo.date   ||'';
+  document.getElementById('partyTime').value   = partyInfo.time   ||'';
+  document.getElementById('partyPlace').value  = partyInfo.place  ||'';
+  document.getElementById('partyBudget').value = partyInfo.budget ||'';
+  document.getElementById('partyKids').value   = partyInfo.kids   ||'';
+  document.getElementById('partyNotes').value  = partyInfo.notes  ||'';
+}
+function updateDaysCount(){
+  const dateVal = document.getElementById('partyDate').value;
+  const el = document.getElementById('statDays');
+  if(!dateVal){ el.textContent='–'; return; }
+  const diff = Math.ceil((new Date(dateVal+'T12:00:00') - new Date()) / 86400000);
+  el.textContent = diff >= 0 ? diff : '0';
+}
+function updateStats(){
+  document.getElementById('statConfirmed').textContent = guests.filter(g=>g.status==='confirmed').length;
+  const done = tasks.filter(t=>t.done).length;
+  document.getElementById('statTasks').textContent = tasks.length ? Math.round(done/tasks.length*100)+'%' : '0%';
+}
+
+// ════════════════════════════════════════════════════════════
+// CHECKLIST (Supabase persistence)
+// ════════════════════════════════════════════════════════════
+async function addTask(){
+  const inp = document.getElementById('newTask');
+  const cat = document.getElementById('newTaskCat').value;
+  const text = inp.value.trim();
+  if(!text) return;
+  inp.value='';
+  setSyncing();
+  const { data, error } = await sb.from('tasks')
+    .insert({ user_id: currentUser.id, party_id: currentPartyId, text, category: cat, done:false })
+    .select().single();
+  if(error){ console.error(error); setSyncError(); showToast('⚠️ Erro ao salvar tarefa'); return; }
+  tasks.push({ id:data.id, text:data.text, cat:data.category, done:data.done });
+  renderTasks(); updateStats(); setSynced();
+}
+async function toggleTask(id){
+  const t = tasks.find(t=>t.id===id);
+  if(!t) return;
+  t.done = !t.done;
+  renderTasks(); updateStats();
+  setSyncing();
+  const { error } = await sb.from('tasks').update({ done: t.done }).eq('id', id);
+  if(error){ console.error(error); setSyncError(); } else { setSynced(); }
+}
+async function deleteTask(id){
+  tasks = tasks.filter(t=>t.id!==id);
+  renderTasks(); updateStats();
+  setSyncing();
+  const { error } = await sb.from('tasks').delete().eq('id', id);
+  if(error){ console.error(error); setSyncError(); } else { setSynced(); }
+}
+function renderTasks(){
+  const c = document.getElementById('checklistItems');
+  const done = tasks.filter(t=>t.done).length;
+  document.getElementById('progressText').textContent=`${done} de ${tasks.length} tarefas`;
+  document.getElementById('progressBar').style.width=tasks.length?(done/tasks.length*100)+'%':'0%';
+  if(!tasks.length){ c.innerHTML='<div class="empty"><div class="emoji">📋</div><p>Nenhuma tarefa ainda.</p></div>'; return; }
+  c.innerHTML=tasks.map(t=>`
+    <div class="check-item ${t.done?'done':''}">
+      <div class="check-box" onclick="toggleTask('${t.id}')">${t.done?'✓':''}</div>
+      <span class="check-label">${esc(t.text)}</span>
+      <span class="check-cat" style="background:${CAT_COLORS[t.cat]||'#8B8BA0'}22;color:${CAT_COLORS[t.cat]||'#8B8BA0'}">${t.cat}</span>
+      <button class="btn-del" onclick="deleteTask('${t.id}')">🗑</button>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════════════════════
+// AGE / GENDER FIELD TOGGLE
+// ════════════════════════════════════════════════════════════
+function toggleAgeField(){
+  const type = document.getElementById('guestType').value;
+  const ageEl = document.getElementById('guestAge');
+  const genderEl = document.getElementById('guestGender');
+  const isChild = type==='crianca';
+  ageEl.style.display = isChild ? 'flex' : 'none';
+  genderEl.style.display = isChild ? 'block' : 'none';
+  if(!isChild){ ageEl.value=''; }
+}
+
+// ════════════════════════════════════════════════════════════
+// GUESTS (Supabase persistence)
+// ════════════════════════════════════════════════════════════
+async function addGuest(){
+  const name   = document.getElementById('guestName').value.trim();
+  const phone  = document.getElementById('guestPhone').value.trim().replace(/\D/g,'');
+  const type   = document.getElementById('guestType').value;
+  const status = document.getElementById('guestStatus').value;
+  const isChild = type==='crianca';
+  const age    = isChild ? document.getElementById('guestAge').value : '';
+  const gender = isChild ? document.getElementById('guestGender').value : '';
+  const responsible = document.getElementById('guestResponsible').checked;
+  if(!name){ showToast('⚠️ Digite o nome do convidado'); return; }
+  const avatar = isChild ? (gender==='menina' ? '👧' : '👦') : '🧑';
+
+  const btn = document.getElementById('addGuestBtn');
+  btn.disabled = true;
+  setSyncing();
+
+  const payload = {
+    user_id: currentUser.id,
+    party_id: currentPartyId,
+    name, phone,
+    guest_type: type,
+    gender: isChild ? gender : null,
+    age: isChild && age ? parseInt(age) : null,
+    status,
+    responsible: phone ? responsible : false,
+    avatar
+  };
+  const { data, error } = await sb.from('guests').insert(payload).select().single();
+  btn.disabled = false;
+
+  if(error){ console.error(error); setSyncError(); showToast('⚠️ Erro ao adicionar convidado'); return; }
+
+  guests.push({
+    id:data.id, name:data.name, phone:data.phone||'', type:data.guest_type,
+    gender:data.gender||'', age:data.age!=null?String(data.age):'',
+    status:data.status, responsible:data.responsible, avatar:data.avatar
+  });
+
+  document.getElementById('guestName').value='';
+  document.getElementById('guestPhone').value='';
+  document.getElementById('guestAge').value='';
+  document.getElementById('guestResponsible').checked=true;
+  renderGuests(); updateStats(); setSynced();
+  showToast('🎉 '+name+' adicionado!');
+}
+async function deleteGuest(id){
+  guests=guests.filter(g=>g.id!==id);
+  renderGuests(); updateStats();
+  setSyncing();
+  const { error } = await sb.from('guests').delete().eq('id', id);
+  if(error){ console.error(error); setSyncError(); } else { setSynced(); }
+}
+async function toggleResponsible(id){
+  const g = guests.find(g=>g.id===id);
+  if(!g) return;
+  g.responsible = !g.responsible;
+  renderGuests();
+  setSyncing();
+  const { error } = await sb.from('guests').update({ responsible: g.responsible }).eq('id', id);
+  if(error){ console.error(error); setSyncError(); } else { setSynced(); }
+}
+function filterGuests(f, el){
+  guestFilter=f;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderGuests();
+}
+function renderGuests(){
+  const c = document.getElementById('guestList');
+  let list = guestFilter==='all' ? guests : guests.filter(g=>g.status===guestFilter);
+  if(!list.length){ c.innerHTML='<div class="empty"><div class="emoji">🎈</div><p>Nenhum convidado nesta categoria.</p></div>'; return; }
+  c.innerHTML=list.map(g=>{
+    const badge = g.status==='confirmed'
+      ? '<span class="status-badge status-confirmed">✅ Confirmado</span>'
+      : g.status==='declined'
+      ? '<span class="status-badge status-declined">❌ Não vem</span>'
+      : '<span class="status-badge status-pending">⏳ Aguardando</span>';
+    const typeText = g.type==='crianca' ? `Criança (${g.gender==='menina'?'menina':'menino'})` : 'Adulto';
+    const sub = [typeText, g.age?g.age+' anos':'', g.phone?formatPhone(g.phone):''].filter(Boolean).join(' · ');
+    const respBtn = g.phone?`<button class="btn-icon" title="${g.responsible?'Responsável pelo WhatsApp (clique para desmarcar)':'Não recebe mensagens em massa (clique para marcar)'}" onclick="toggleResponsible('${g.id}')" style="${g.responsible?'background:#E8F9F0':'opacity:.35'}">${g.responsible?'⭐':'☆'}</button>`:'';
+    const waBtn = g.phone?`<button class="btn-icon btn-whatsapp" title="Enviar WhatsApp" onclick="sendWhatsApp('${g.id}')">📲</button>`:'';
+    return `<div class="guest-card">
+      <div class="guest-top">
+        <div class="avatar" style="background:#f0f0ff">${g.avatar}</div>
+        <div class="guest-info">
+          <div class="guest-name">${esc(g.name)}</div>
+          <div class="guest-sub">${sub}</div>
+        </div>
+      </div>
+      <div class="guest-bottom">
+        ${badge}
+        <div class="guest-actions">
+          <button class="btn-icon" title="Atualizar" onclick="openModal('${g.id}')">✏️</button>
+          ${respBtn}
+          ${waBtn}
+          <button class="btn-icon" title="Remover" onclick="deleteGuest('${g.id}')">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════
+// EXPORT GUESTS
+// ════════════════════════════════════════════════════════════
+function exportGuests(){
+  if(!guests.length){ showToast('⚠️ Nenhum convidado para exportar'); return; }
+
+  const statusLabel = {confirmed:'Confirmado', pending:'Aguardando', declined:'Não vem'};
+
+  const data = [
+    ['Nome', 'Tipo', 'Sexo', 'Idade', 'WhatsApp', 'Recebe mensagens', 'Status']
+  ];
+  guests.forEach(g=>{
+    const typeLabel = g.type==='crianca' ? 'Criança' : 'Adulto';
+    const genderLabel = g.type==='crianca' ? (g.gender==='menina' ? 'Menina' : 'Menino') : '';
+    data.push([
+      g.name, typeLabel, genderLabel, g.age || '',
+      g.phone ? formatPhone(g.phone) : '',
+      g.phone ? (g.responsible ? 'Sim' : 'Não') : '',
+      statusLabel[g.status] || g.status
+    ]);
+  });
+
+  const confirmed = guests.filter(g=>g.status==='confirmed').length;
+  const pending   = guests.filter(g=>g.status==='pending').length;
+  const declined  = guests.filter(g=>g.status==='declined').length;
+  data.push([]);
+  data.push(['Resumo', '', '', '', '', '', '']);
+  data.push(['Total de convidados', guests.length, '', '', '', '', '']);
+  data.push(['Confirmados',  confirmed, '', '', '', '', '']);
+  data.push(['Aguardando',   pending,   '', '', '', '', '']);
+  data.push(['Não vêm',      declined,  '', '', '', '', '']);
+
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [{wch:28},{wch:10},{wch:10},{wch:8},{wch:18},{wch:16},{wch:14}];
+  ['A1','B1','C1','D1','E1','F1','G1'].forEach(ref=>{
+    if(ws[ref]) ws[ref].s = {font:{bold:true}, fill:{fgColor:{rgb:'F0E6FF'}}};
+  });
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Convidados');
+  const child = partyInfo.child ? partyInfo.child.replace(/\s+/g,'_') : 'festa';
+  XLSX.writeFile(wb, `convidados_${child}.xlsx`);
+  showToast('📊 Planilha exportada com sucesso!');
+}
+
+// ════════════════════════════════════════════════════════════
+// MODAL: STATUS
+// ════════════════════════════════════════════════════════════
+function openModal(id){
+  editingGuestId=id;
+  const g=guests.find(g=>g.id===id);
+  document.getElementById('modalGuestName').textContent='✏️ Presença de '+g.name;
+  ['confirmed','pending','declined'].forEach(s=>{
+    document.getElementById('opt'+capitalize(s)).className='status-opt'+(g.status===s?' sel-'+s:'');
+  });
+  document.getElementById('statusModal').classList.add('open');
+}
+function closeModal(){ document.getElementById('statusModal').classList.remove('open'); editingGuestId=null; }
+async function setStatus(s){
+  const g=guests.find(g=>g.id===editingGuestId);
+  closeModal();
+  if(!g) return;
+  g.status=s; renderGuests(); updateStats();
+  setSyncing();
+  const { error } = await sb.from('guests').update({ status: s }).eq('id', g.id);
+  if(error){ console.error(error); setSyncError(); } else { setSynced(); }
+  showToast('Status atualizado!');
+}
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('statusModal').addEventListener('click',function(e){ if(e.target===this) closeModal(); });
+  document.getElementById('msgChoiceModal').addEventListener('click',function(e){ if(e.target===this) closeMsgChoiceModal(); });
+});
+
+// ════════════════════════════════════════════════════════════
+// WHATSAPP
+// ════════════════════════════════════════════════════════════
+function buildMsg(guestName){
+  const child=partyInfo.child||'____', theme=partyInfo.theme?` com tema ${partyInfo.theme}`:'',
+        date=partyInfo.date?formatDate(partyInfo.date):'____', time=partyInfo.time||'____', place=partyInfo.place||'____';
+  return `🎉 Olá, ${guestName||'[nome]'}!\n\nVocê está convidado(a) para a festa de aniversário de *${child}*${theme}! 🎂\n\n📅 *Data:* ${date}\n🕐 *Horário:* ${time}\n📍 *Local:* ${place}\n\nConfirme sua presença respondendo esta mensagem. Será uma alegria ter você por lá! 🎈`;
+}
+let pendingWhatsAppGuestId = null;
+function sendWhatsApp(id){
+  const g = guests.find(g=>g.id===id);
+  if(!g||!g.phone){ showToast('⚠️ Nenhum WhatsApp cadastrado'); return; }
+  pendingWhatsAppGuestId = id;
+  openMsgChoiceModal(g);
+}
+function openMsgChoiceModal(g){
+  const templates = getMessageTemplates();
+  const customText = document.getElementById('customMsgInput') ? document.getElementById('customMsgInput').value.trim() : '';
+  let optionsHtml = templates.map(t=>`
+    <div class="msg-choice-opt" onclick='confirmSendChoice(${JSON.stringify(t.msg)})'>
+      <span class="ico">${t.icon}</span>
+      <div class="msg-choice-text">
+        <div class="msg-choice-title">${t.type}</div>
+        <div class="msg-choice-snippet">${esc(t.msg.replace(/\[nome\]/gi,g.name).split('\n')[0])}</div>
+      </div>
+    </div>`).join('');
+  if(customText){
+    optionsHtml += `
+    <div class="msg-choice-opt" onclick='confirmSendChoice(${JSON.stringify(customText)})'>
+      <span class="ico">✍️</span>
+      <div class="msg-choice-text">
+        <div class="msg-choice-title">Personalizada</div>
+        <div class="msg-choice-snippet">${esc(customText.replace(/\[nome\]/gi,g.name).split('\n')[0])}</div>
+      </div>
+    </div>`;
+  }
+  document.getElementById('msgChoiceGuestName').textContent = '📲 Enviar para '+g.name;
+  document.getElementById('msgChoiceOptions').innerHTML = optionsHtml;
+  document.getElementById('msgChoiceModal').classList.add('open');
+}
+function closeMsgChoiceModal(){
+  document.getElementById('msgChoiceModal').classList.remove('open');
+  pendingWhatsAppGuestId = null;
+}
+function confirmSendChoice(msgTemplate){
+  const g = guests.find(g=>g.id===pendingWhatsAppGuestId);
+  closeMsgChoiceModal();
+  if(!g) return;
+  const msg = msgTemplate.replace(/\[nome\]/gi, g.name);
+  window.open(`https://wa.me/55${g.phone}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+const GROUP_LABELS = { all:'Todos', confirmed:'Confirmados', pending:'Aguardando', declined:'Não vêm' };
+function guestsInGroup(group){
+  let list = group==='all' ? guests : guests.filter(g=>g.status===group);
+  return list.filter(g=>g.phone && g.responsible);
+}
+function sendBulk(groupSelectId, msgTemplate){
+  const group = document.getElementById(groupSelectId).value;
+  const recipients = guestsInGroup(group);
+  if(!recipients.length){ showToast(`⚠️ Nenhum convidado com WhatsApp em "${GROUP_LABELS[group]}"`); return; }
+  recipients.forEach((g,i)=>setTimeout(()=>{
+    const msg = msgTemplate.replace(/\[nome\]/gi, g.name);
+    window.open(`https://wa.me/55${g.phone}?text=${encodeURIComponent(msg)}`,'_blank');
+  }, i*800));
+  showToast(`📤 Enviando para ${recipients.length} convidado(s) – ${GROUP_LABELS[group]}`);
+}
+function groupCount(group){ return guestsInGroup(group).length; }
+function groupSelectorHTML(id){
+  return `
+    <div class="msg-group-row">
+      <select class="group-select" id="${id}">
+        <option value="all">👥 Todos (${groupCount('all')})</option>
+        <option value="confirmed">✅ Confirmados (${groupCount('confirmed')})</option>
+        <option value="pending">⏳ Aguardando (${groupCount('pending')})</option>
+        <option value="declined">❌ Não vêm (${groupCount('declined')})</option>
+      </select>
+    </div>`;
+}
+
+function getMessageTemplates(){
+  return [
+    {id:'tpl0',icon:'💌',type:'Convite',    msg:buildMsg('[nome]')},
+    {id:'tpl1',icon:'⏳',type:'Lembrete',   msg:`🎉 Olá, [nome]!\n\nVou lembrá-lo(a) da festa de ${partyInfo.child||'____'}!\n\n📅 *${formatDate(partyInfo.date)||'____'}* às *${partyInfo.time||'____'}*\n📍 ${partyInfo.place||'____'}\n\nAinda não confirmou? Me avise! 😊`},
+    {id:'tpl2',icon:'✅',type:'Confirmação',msg:`Que alegria, [nome]! 🥳 Sua presença está confirmada na festa de ${partyInfo.child||'____'}!\n\nJá estamos contando os dias! Vai ter muita diversão, bolo e brincadeira te esperando. 🎂🎈\n\nAté lá! 💕`},
+    {id:'tpl3',icon:'📸',type:'Pós-festa',  msg:`Muito obrigado, [nome], por fazer parte da festa de ${partyInfo.child||'____'}! 🎉\n\nAs fotos estão saindo lindas! Em breve compartilhamos por aqui. 💕`},
+  ];
+}
+
+function renderTemplates(){
+  const templates = getMessageTemplates();
+  document.getElementById('msgTemplates').innerHTML=templates.map(t=>`
+    <div class="msg-card">
+      <div class="msg-card-header"><span style="font-size:20px">${t.icon}</span><span class="msg-type">${t.type}</span></div>
+      <div class="msg-preview">${esc(t.msg)}</div>
+      ${groupSelectorHTML(t.id+'-group')}
+      <div class="msg-actions">
+        <button class="btn-sm btn-outline" onclick="copyMsg(this,'${encodeURIComponent(t.msg)}')">📋 Copiar</button>
+        <button class="btn-sm btn-green"   onclick="openWA('${encodeURIComponent(t.msg.replace(/\[nome\]/gi,'[nome do convidado]'))}')">📲 Um contato</button>
+      </div>
+      <button class="btn-bulk" style="width:100%;margin-top:8px" onclick='sendBulk("${t.id}-group", ${JSON.stringify(t.msg)})'>🚀 Enviar em massa</button>
+    </div>`).join('');
+
+  renderCustomPreview();
+}
+function renderCustomPreview(){
+  const text = document.getElementById('customMsgInput').value.trim();
+  const card = document.getElementById('customMsgCard');
+  if(!text){ card.innerHTML=''; return; }
+  card.innerHTML = `
+    <div class="msg-preview">${esc(text.replace(/\[nome\]/gi,'[nome do convidado]'))}</div>
+    ${groupSelectorHTML('custom-group')}
+    <div class="msg-actions">
+      <button class="btn-sm btn-outline" onclick="copyMsg(this,'${encodeURIComponent(text)}')">📋 Copiar</button>
+      <button class="btn-sm btn-green"   onclick="openWA('${encodeURIComponent(text.replace(/\[nome\]/gi,'[nome do convidado]'))}')">📲 Um contato</button>
+    </div>
+    <button class="btn-bulk" style="width:100%;margin-top:8px" onclick='sendBulk("custom-group", ${JSON.stringify(text)})'>🚀 Enviar em massa</button>
+  `;
+}
+function copyMsg(btn,encoded){ navigator.clipboard.writeText(decodeURIComponent(encoded)); btn.textContent='✅ Copiado!'; setTimeout(()=>btn.textContent='📋 Copiar',2000); showToast('Mensagem copiada!'); }
+function openWA(encoded){ window.open(`https://wa.me/?text=${encoded}`,'_blank'); }
+
+// ════════════════════════════════════════════════════════════
+// SETTINGS (Supabase persistence)
+// ════════════════════════════════════════════════════════════
+async function persistSettings(){
+  setSyncing();
+  const payload = {
+    title: appSettings.title, font: appSettings.font, logo: appSettings.logo,
+    banner: appSettings.banner, theme: appSettings.theme
+  };
+  const { error } = await sb.from('app_settings').update(payload).eq('user_id', currentUser.id);
+  if(error){ console.error(error); setSyncError(); } else { setSynced(); }
+}
+
+function applySettings(){
+  const theme = THEMES.find(t=>t.id===appSettings.theme) || THEMES[0];
+  document.documentElement.style.setProperty('--c1', theme.c1);
+  document.documentElement.style.setProperty('--c2', theme.c2);
+  document.documentElement.style.setProperty('--bg', theme.bg);
+  document.documentElement.style.setProperty('--title-font', `'${appSettings.font}', cursive`);
+
+  document.getElementById('headerLogo').textContent  = appSettings.logo;
+  document.getElementById('previewLogo').textContent = appSettings.logo;
+
+  document.getElementById('headerTitle').textContent  = appSettings.title;
+  document.getElementById('previewTitle').textContent = appSettings.title;
+  document.title = appSettings.title + ' – Organizador de Festas Infantis';
+
+  const bannerStr = (appSettings.banner+' ').repeat(20);
+  document.getElementById('headerBanner').textContent = bannerStr;
+
+  const prev = document.getElementById('settingsPreview');
+  if(prev){
+    prev.style.background = theme.gradient;
+    prev.setAttribute('data-banner', appSettings.banner);
+  }
+  document.getElementById('previewTitle').style.fontFamily = `'${appSettings.font}', cursive`;
+  document.querySelector('header').style.background = `linear-gradient(135deg, ${theme.c1} 0%, ${theme.c2} 100%)`;
+}
+
+function buildSettingsUI(){
+  document.getElementById('titleInput').value = appSettings.title;
+
+  document.getElementById('themeGrid').innerHTML = THEMES.map(t=>`
+    <div class="theme-opt ${appSettings.theme===t.id?'selected':''}" onclick="selectTheme('${t.id}',this)">
+      <div class="theme-swatch" style="background:${t.gradient}"></div>
+      <div class="theme-label">${t.label}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('fontGrid').innerHTML = FONTS.map(f=>`
+    <div class="font-option ${appSettings.font===f.name?'selected':''}" onclick="selectFont('${f.name}',this)">
+      <div class="font-preview" style="font-family:'${f.name}',cursive">FestaKids</div>
+      <div class="font-name">${f.name}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('logoEmojiGrid').innerHTML = LOGO_EMOJIS.map(e=>`
+    <div class="emoji-opt ${appSettings.logo===e?'selected':''}" onclick="selectLogo('${e}',this)">${e}</div>
+  `).join('');
+
+  document.getElementById('bannerPresets').innerHTML = BANNER_PRESETS.map(b=>`
+    <div class="banner-opt ${appSettings.banner===b?'selected':''}" onclick="selectBanner('${b}',this)">${b.repeat(5)}</div>
+  `).join('');
+}
+
+function updateTitlePreview(){
+  const val = document.getElementById('titleInput').value.trim();
+  document.getElementById('previewTitle').textContent = val || 'FestaKids';
+}
+function applyTitle(){
+  const val = document.getElementById('titleInput').value.trim();
+  if(!val){ showToast('⚠️ Digite um título'); return; }
+  appSettings.title = val;
+  applySettings(); persistSettings();
+  showToast('📝 Título atualizado!');
+}
+function selectTheme(id, el){
+  appSettings.theme = id;
+  document.querySelectorAll('.theme-opt').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  applySettings(); persistSettings();
+  const t = THEMES.find(t=>t.id===id);
+  showToast('🎨 Tema '+t.label+' aplicado!');
+}
+function selectFont(name, el){
+  appSettings.font = name;
+  document.querySelectorAll('.font-option').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  applySettings(); persistSettings();
+  showToast('✏️ Fonte: '+name);
+}
+function selectLogo(emoji, el){
+  appSettings.logo = emoji;
+  document.querySelectorAll('.emoji-opt').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  applySettings(); persistSettings();
+}
+function selectBanner(b, el){
+  appSettings.banner = b;
+  document.querySelectorAll('.banner-opt').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  applySettings(); persistSettings();
+}
+function applyCustomBanner(){
+  const val = document.getElementById('bannerCustomInput').value.trim();
+  if(!val){ showToast('⚠️ Digite os emojis primeiro'); return; }
+  appSettings.banner = val;
+  document.querySelectorAll('.banner-opt').forEach(e=>e.classList.remove('selected'));
+  applySettings(); persistSettings();
+  showToast('Cabeçalho personalizado aplicado!');
+}
+function resetSettings(){
+  appSettings = defaultSettingsPayload();
+  applySettings(); buildSettingsUI(); persistSettings();
+  showToast('⚙️ Configurações restauradas');
+}
+
+// ════════════════════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════════════════════
+function showTab(name, btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='messages') renderTemplates();
+}
+
+// ════════════════════════════════════════════════════════════
+// TOAST / UTILS
+// ════════════════════════════════════════════════════════════
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+function formatPhone(p){ return p.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3'); }
+function formatDate(d){ if(!d) return ''; const [y,m,day]=d.split('-'); return `${day}/${m}/${y}`; }
+
+// ════════════════════════════════════════════════════════════
+// BOOT
+// ════════════════════════════════════════════════════════════
+bootstrap();
+</script>
+</body>
+</html>
