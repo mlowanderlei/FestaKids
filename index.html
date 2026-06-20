@@ -1164,8 +1164,22 @@ function renderPartyCards(){
 }
 
 async function createNewParty(){
+  const btn = document.querySelector('.btn-new-party');
+  if(btn){ btn.disabled = true; btn.textContent = 'Criando…'; }
+
   const { data, error } = await sb.from('parties').insert({ user_id: currentUser.id }).select().single();
-  if(error){ console.error(error); showToast('⚠️ Erro ao criar festa'); return; }
+
+  if(btn){ btn.disabled = false; btn.textContent = '➕ Criar Nova Festa'; }
+
+  if(error){
+    console.error('Erro ao criar festa:', error);
+    showToast('⚠️ Erro: ' + (error.message || 'não foi possível criar a festa'));
+    return;
+  }
+  if(!data){
+    showToast('⚠️ Festa não foi criada (resposta vazia do banco)');
+    return;
+  }
   await enterParty(data.id);
 }
 
