@@ -337,6 +337,14 @@
   .status-opt.sel-declined  { border-color: var(--c1); background: #FFF0F0; color: #E03E2D; }
   .btn-close-modal { width: 100%; margin-top: 16px; padding: 12px; border-radius: 12px; border: 2px solid #EEEEF5; background: none; font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; color: var(--muted); }
 
+  .confirm-modal-icon { font-size: 48px; text-align: center; margin-bottom: 10px; }
+  .confirm-modal-text { text-align: center; font-size: 14px; color: var(--dark); font-weight: 600; line-height: 1.5; margin-bottom: 6px; }
+  .confirm-modal-name { text-align: center; font-family: var(--title-font); font-size: 18px; color: var(--dark); margin-bottom: 10px; }
+  .confirm-modal-warn { text-align: center; font-size: 12px; color: #E03E2D; font-weight: 700; background: #FDECEA; border-radius: 10px; padding: 10px; margin-bottom: 4px; }
+  .btn-danger { width: 100%; margin-top: 16px; padding: 13px; border-radius: 12px; border: none; background: #E03E2D; color: #fff; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 14px; cursor: pointer; transition: filter .2s; }
+  .btn-danger:hover { filter: brightness(1.1); }
+  .btn-danger:disabled { opacity: 0.6; cursor: not-allowed; }
+
   .msg-choice-list { display: flex; flex-direction: column; gap: 10px; max-height: 50vh; overflow-y: auto; }
   .msg-choice-opt {
     display: flex; align-items: center; gap: 12px; padding: 12px 14px;
@@ -624,6 +632,18 @@
   <div class="parties-main">
     <button class="btn-new-party" onclick="createNewParty()">➕ Criar Nova Festa</button>
     <div class="party-card-list" id="partyCardList"></div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR EXCLUSÃO DE FESTA -->
+<div class="modal-overlay" id="deletePartyModal">
+  <div class="modal">
+    <div class="confirm-modal-icon">🗑️</div>
+    <div class="confirm-modal-text">Tem certeza que deseja excluir</div>
+    <div class="confirm-modal-name" id="deletePartyName">esta festa?</div>
+    <div class="confirm-modal-warn">⚠️ Todos os convidados, tarefas e configurações dessa festa serão apagados permanentemente. Essa ação não pode ser desfeita.</div>
+    <button class="btn-danger" id="confirmDeleteBtn" onclick="executeDeleteParty()">🗑️ Sim, excluir festa</button>
+    <button class="btn-close-modal" onclick="closeDeletePartyModal()">Cancelar</button>
   </div>
 </div>
 
@@ -1151,16 +1171,34 @@ async function createNewParty(){
 
 let partyPendingDeleteId = null;
 function confirmDeleteParty(partyId, name){
-  if(!confirm(`Tem certeza que deseja excluir "${name}"?\n\nTodos os convidados, tarefas e configurações dessa festa serão apagados permanentemente.`)) return;
-  deleteParty(partyId);
+  partyPendingDeleteId = partyId;
+  document.getElementById('deletePartyName').textContent = name;
+  document.getElementById('deletePartyModal').classList.add('open');
 }
-async function deleteParty(partyId){
+function closeDeletePartyModal(){
+  document.getElementById('deletePartyModal').classList.remove('open');
+  partyPendingDeleteId = null;
+}
+async function executeDeleteParty(){
+  if(!partyPendingDeleteId) return;
+  const partyId = partyPendingDeleteId;
+  const btn = document.getElementById('confirmDeleteBtn');
+  btn.disabled = true;
+  btn.textContent = 'Excluindo…';
+
   const { data, error } = await sb.from('parties').delete().eq('id', partyId).select();
-  if(error){ console.error(error); showToast('⚠️ Erro ao excluir festa: ' + error.message); return; }
+
+  btn.disabled = false;
+  btn.textContent = '🗑️ Sim, excluir festa';
+
+  if(error){ console.error(error); closeDeletePartyModal(); showToast('⚠️ Erro ao excluir festa: ' + error.message); return; }
   if(!data || data.length === 0){
+    closeDeletePartyModal();
     showToast('⚠️ Não foi possível excluir (permissão negada ou festa não encontrada)');
     return;
   }
+
+  closeDeletePartyModal();
   showToast('🗑️ Festa excluída');
   userParties = userParties.filter(p => p.id !== partyId);
   renderPartyCards();
@@ -2128,6 +2166,7 @@ async function saveGuestEdit(){
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('editModal').addEventListener('click',function(e){ if(e.target===this) closeEditModal(); });
   document.getElementById('msgChoiceModal').addEventListener('click',function(e){ if(e.target===this) closeMsgChoiceModal(); });
+  document.getElementById('deletePartyModal').addEventListener('click',function(e){ if(e.target===this) closeDeletePartyModal(); });
 });
 
 // ════════════════════════════════════════════════════════════
