@@ -860,10 +860,10 @@
       <button class="btn-logout-settings" onclick="handleLogout()">🚪 Sair da conta</button>
     </div>
 
-    <!-- Título da página -->
+    <!-- Título da festa -->
     <div class="card">
-      <div class="card-title">📝 Título da Página</div>
-      <p style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:10px">Texto decorativo exibido no topo do app. Não altera o nome da criança usado em "Minhas Festas".</p>
+      <div class="card-title">📝 Título da Festa</div>
+      <p style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:10px">Aparece no topo do app e é o nome usado para esta festa em "Minhas Festas".</p>
       <div class="banner-custom-wrap">
         <input type="text" class="banner-custom-input" id="titleInput" placeholder="Ex: Festa da Sofia" maxlength="30" style="font-size:14px" oninput="updateTitlePreview()">
         <button class="btn-apply" onclick="applyTitle()">Aplicar</button>
@@ -1121,14 +1121,22 @@ async function loadPartiesList(){
     return;
   }
 
-  // fetch guest counts for each party in parallel
-  const counts = await Promise.all(userParties.map(p =>
-    sb.from('guests').select('status', { count: 'exact', head: false }).eq('party_id', p.id)
-  ));
+  // fetch guest counts and the festa title (app_settings) for each party in parallel
+  const [counts, settingsRows] = await Promise.all([
+    Promise.all(userParties.map(p =>
+      sb.from('guests').select('status', { count: 'exact', head: false }).eq('party_id', p.id)
+    )),
+    sb.from('app_settings').select('party_id, title').in('party_id', userParties.map(p => p.id))
+  ]);
+
+  const titleByParty = {};
+  (settingsRows.data || []).forEach(s => { titleByParty[s.party_id] = s.title; });
+
   userParties.forEach((p, i) => {
     const rows = counts[i].data || [];
     p._guestCount = rows.length;
     p._confirmedCount = rows.filter(r => r.status === 'confirmed').length;
+    p._title = titleByParty[p.id] || '';
   });
 
   renderPartyCards();
@@ -1141,7 +1149,7 @@ function renderPartyCards(){
     return;
   }
   el.innerHTML = userParties.map(p => {
-    const name = p.child_name ? `Festa de ${esc(p.child_name)}` : 'Festa sem nome';
+    const name = p._title && p._title.trim() ? esc(p._title) : 'Festa sem título';
     const dateStr = p.party_date ? formatDate(p.party_date) : 'Data não definida';
     const guestCount = p._guestCount != null ? p._guestCount : '–';
     const confirmedCount = p._confirmedCount != null ? p._confirmedCount : '–';
