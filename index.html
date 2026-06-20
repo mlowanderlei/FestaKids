@@ -452,6 +452,109 @@
   .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); flex-shrink: 0; }
   .sync-dot.syncing { background: var(--yellow); animation: pulse 1s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ── MINHAS FESTAS (hub) ── */
+  #partiesScreen {
+    min-height: 100vh;
+    background: var(--bg);
+  }
+  .parties-header {
+    background: linear-gradient(135deg, #FF6B9D 0%, #C77DFF 100%);
+    padding: 20px 20px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .parties-header::before {
+    content: '🎈🎁🎂🎉🎊🦄🌈🎠🍭🧁';
+    position: absolute; top: -10px; left: 0; font-size: 44px; opacity: 0.13;
+    letter-spacing: 14px; white-space: nowrap; width: 200%;
+    animation: slide 25s linear infinite;
+  }
+  .parties-header-top { display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 1; margin-bottom: 16px; }
+  .parties-header-top .email-chip { font-size: 11px; color: rgba(255,255,255,0.9); font-weight: 700; }
+  .parties-title-row { position: relative; z-index: 1; display: flex; align-items: center; gap: 10px; }
+  .parties-title-row .logo { font-size: 38px; }
+  .parties-title-row h1 { font-family: var(--title-font); font-size: 26px; color: #fff; }
+  .parties-title-row p { color: rgba(255,255,255,0.85); font-size: 12px; font-weight: 600; }
+
+  .parties-main { padding: 20px 16px; max-width: 520px; margin: 0 auto; }
+  .btn-new-party {
+    width: 100%; padding: 16px; border-radius: 18px; border: 2.5px dashed #D9B8FF;
+    background: #FBF5FF; color: var(--c2, #C77DFF); font-family: 'Nunito', sans-serif;
+    font-weight: 800; font-size: 15px; cursor: pointer; transition: all .2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 18px;
+  }
+  .btn-new-party:hover { background: #F5E8FF; border-color: #C77DFF; }
+
+  .party-card-list { display: flex; flex-direction: column; gap: 12px; }
+  .party-card {
+    background: var(--white); border-radius: 20px; padding: 18px; box-shadow: var(--card-shadow);
+    cursor: pointer; transition: transform .15s, box-shadow .15s; position: relative;
+  }
+  .party-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+  .party-card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .party-card-emoji { font-size: 32px; flex-shrink: 0; }
+  .party-card-info { flex: 1; min-width: 0; }
+  .party-card-name { font-family: var(--title-font); font-size: 18px; color: var(--dark); line-height: 1.2; }
+  .party-card-date { font-size: 12px; color: var(--muted); font-weight: 700; margin-top: 2px; }
+  .party-card-stats { display: flex; gap: 8px; flex-wrap: wrap; }
+  .party-card-stat {
+    font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px;
+    background: #F5F5FF; color: var(--dark);
+  }
+  .party-card-delete {
+    position: absolute; top: 14px; right: 14px; width: 30px; height: 30px;
+    border-radius: 8px; border: none; background: #FDECEA; color: #E03E2D;
+    font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background .2s; opacity: 0; pointer-events: none;
+  }
+  .party-card:hover .party-card-delete { opacity: 1; pointer-events: auto; }
+  .party-card-delete:hover { background: #E03E2D; color: #fff; }
+
+  .btn-back-hub {
+    background: rgba(255,255,255,0.2); color: #fff; border: none; border-radius: 8px;
+    padding: 5px 10px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 11px;
+    cursor: pointer; transition: background .2s; flex-shrink: 0; white-space: nowrap;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .btn-back-hub:hover { background: rgba(255,255,255,0.35); }
+
+  /* ── BUSCA DE CONVIDADOS ── */
+  .guest-search-wrap { position: relative; margin-bottom: 10px; }
+  .guest-search-wrap input {
+    width: 100%; padding: 10px 38px 10px 14px; border: 2px solid #EEEEF5;
+    border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 14px;
+    background: #FAFAFF; color: var(--dark);
+  }
+  .guest-search-wrap input:focus { outline: none; border-color: var(--c1); }
+  .guest-search-wrap .search-ico { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; opacity: .5; pointer-events: none; }
+  .guest-search-clear {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    background: #EEEEF5; border: none; width: 22px; height: 22px; border-radius: 50%;
+    font-size: 12px; cursor: pointer; display: none; align-items: center; justify-content: center;
+  }
+
+  /* ── IMPORTAR / TEMPLATE ── */
+  .import-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .btn-template, .btn-import {
+    flex: 1 1 auto; padding: 8px 14px; border-radius: 12px; font-family: 'Nunito', sans-serif;
+    font-weight: 800; font-size: 12px; cursor: pointer; transition: all .2s;
+    display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap;
+  }
+  .btn-template { background: #EFF6FF; color: #2E6FD9; border: 2px solid #C9E0FF; }
+  .btn-template:hover { background: #2E6FD9; color: #fff; border-color: #2E6FD9; }
+  .btn-import { background: #FFF8E1; color: #B8860B; border: 2px solid #FFE6A3; }
+  .btn-import:hover { background: #B8860B; color: #fff; border-color: #B8860B; }
+
+  .import-summary { background: #FAFAFF; border: 2px solid #EEEEF5; border-radius: 14px; padding: 14px; margin-bottom: 10px; }
+  .import-summary-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; font-size: 13px; font-weight: 700; }
+  .import-summary-row .lbl { color: var(--muted); }
+  .import-summary-row .val { color: var(--dark); }
+  .import-summary-row.ok .val { color: #2D9E52; }
+  .import-summary-row.skip .val { color: #E6A817; }
+  .import-summary-row.err .val { color: #E03E2D; }
+  .import-error-list { max-height: 140px; overflow-y: auto; margin-top: 8px; font-size: 11px; color: #E03E2D; font-weight: 600; }
+  .import-error-list div { padding: 3px 0; border-top: 1px solid #FDECEA; }
 </style>
 </head>
 <body>
@@ -502,14 +605,37 @@
 </div>
 
 <!-- ════════════════════════════════════════════════════════════
-     APP PRINCIPAL (visível só após login)
+     MINHAS FESTAS (hub de gerenciamento de festas)
+═════════════════════════════════════════════════════════════ -->
+<div id="partiesScreen" style="display:none">
+  <div class="parties-header">
+    <div class="parties-header-top">
+      <span class="email-chip" id="partiesHeaderEmail"></span>
+      <button class="btn-logout" onclick="handleLogout()">Sair</button>
+    </div>
+    <div class="parties-title-row">
+      <div class="logo">🎉</div>
+      <div>
+        <h1>Minhas Festas</h1>
+        <p>Escolha uma festa ou crie uma nova</p>
+      </div>
+    </div>
+  </div>
+  <div class="parties-main">
+    <button class="btn-new-party" onclick="createNewParty()">➕ Criar Nova Festa</button>
+    <div class="party-card-list" id="partyCardList"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     APP PRINCIPAL (visível só após escolher uma festa)
 ═════════════════════════════════════════════════════════════ -->
 <div id="appRoot" style="display:none">
 
 <header>
   <div id="headerBanner"></div>
   <div class="user-bar">
-    <span class="user-bar-email" id="userBarEmail"></span>
+    <button class="btn-back-hub" onclick="goToPartiesHub()">‹ Minhas Festas</button>
     <span class="sync-indicator" id="syncIndicator"><span class="sync-dot" id="syncDot"></span><span id="syncText">Salvo</span></span>
     <button class="btn-logout" onclick="handleLogout()">Sair</button>
   </div>
@@ -580,6 +706,12 @@
   <div id="tab-guests" class="section">
     <div class="card">
       <div class="card-title">👤 Adicionar Convidado</div>
+      <div class="import-row">
+        <button class="btn-template" onclick="downloadGuestTemplate()">📄 Baixar modelo de planilha</button>
+        <button class="btn-import" onclick="document.getElementById('importFileInput').click()">📥 Importar planilha</button>
+        <input type="file" id="importFileInput" accept=".xlsx,.xls" style="display:none" onchange="handleImportFile(event)">
+      </div>
+      <div id="importSummary"></div>
       <div class="guest-form">
         <div class="row">
           <input type="text" id="guestName" placeholder="Nome do convidado">
@@ -610,6 +742,12 @@
         </label>
         <button class="btn-primary" id="addGuestBtn" onclick="addGuest()">➕ Adicionar Convidado</button>
       </div>
+    </div>
+
+    <div class="guest-search-wrap">
+      <input type="text" id="guestSearchInput" placeholder="Buscar convidado por nome ou tag…" oninput="onGuestSearchInput()">
+      <span class="search-ico" id="guestSearchIco">🔍</span>
+      <button class="guest-search-clear" id="guestSearchClear" onclick="clearGuestSearch()">✕</button>
     </div>
 
     <div class="guest-list-header">
@@ -698,6 +836,7 @@
           <div class="label-text">Conectado</div>
         </div>
       </div>
+      <button class="btn-logout-settings" onclick="goToPartiesHub()" style="border-color:#EEEEF5;color:var(--dark);margin-bottom:8px">🎉 Ver Minhas Festas</button>
       <button class="btn-logout-settings" onclick="handleLogout()">🚪 Sair da conta</button>
     </div>
 
@@ -816,6 +955,7 @@ let guestFilter = 'all';
 let editingGuestId = null;
 let guestSort = 'recent';
 let guestPage = 1;
+let guestSearchQuery = '';
 const GUESTS_PER_PAGE = 8;
 let appSettings = { title:'FestaKids', font:'Baloo 2', logo:'🎂', banner:'🎈🎁🎂🎉🎊', theme:'menina' };
 
@@ -860,7 +1000,7 @@ async function bootstrap(){
   const { data: { session } } = await sb.auth.getSession();
   if(session && session.user){
     currentUser = session.user;
-    await enterApp();
+    await showPartiesHub();
   } else {
     showAuthScreen();
   }
@@ -868,7 +1008,7 @@ async function bootstrap(){
   sb.auth.onAuthStateChange((event, session) => {
     if(event === 'SIGNED_IN' && session && (!currentUser || currentUser.id !== session.user.id)){
       currentUser = session.user;
-      enterApp();
+      showPartiesHub();
     } else if(event === 'SIGNED_OUT'){
       currentUser = null;
       currentPartyId = null;
@@ -880,22 +1020,122 @@ async function bootstrap(){
 function showAuthScreen(){
   document.getElementById('authLoadingScreen').style.display = 'none';
   document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('partiesScreen').style.display = 'none';
   document.getElementById('appRoot').style.display = 'none';
 }
 
-async function enterApp(){
+// ════════════════════════════════════════════════════════════
+// MINHAS FESTAS (hub)
+// ════════════════════════════════════════════════════════════
+let userParties = [];
+
+async function showPartiesHub(){
   document.getElementById('authLoadingScreen').style.display = 'flex';
   document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('appRoot').style.display = 'none';
 
-  document.getElementById('userBarEmail').textContent = currentUser.email;
-  document.getElementById('accountEmail').textContent = currentUser.email;
+  document.getElementById('partiesHeaderEmail').textContent = currentUser.email;
+
+  await loadPartiesList();
+
+  document.getElementById('authLoadingScreen').style.display = 'none';
+  document.getElementById('partiesScreen').style.display = 'block';
+}
+
+async function loadPartiesList(){
+  const { data: parties, error } = await sb
+    .from('parties')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false });
+
+  if(error){ console.error(error); userParties = []; renderPartyCards(); return; }
+
+  userParties = parties || [];
+
+  if(userParties.length === 0){
+    renderPartyCards();
+    return;
+  }
+
+  // fetch guest counts for each party in parallel
+  const counts = await Promise.all(userParties.map(p =>
+    sb.from('guests').select('status', { count: 'exact', head: false }).eq('party_id', p.id)
+  ));
+  userParties.forEach((p, i) => {
+    const rows = counts[i].data || [];
+    p._guestCount = rows.length;
+    p._confirmedCount = rows.filter(r => r.status === 'confirmed').length;
+  });
+
+  renderPartyCards();
+}
+
+function renderPartyCards(){
+  const el = document.getElementById('partyCardList');
+  if(!userParties.length){
+    el.innerHTML = `<div class="empty"><div class="emoji">🎉</div><p>Nenhuma festa criada ainda.<br>Clique em "Criar Nova Festa" para começar!</p></div>`;
+    return;
+  }
+  el.innerHTML = userParties.map(p => {
+    const name = p.child_name ? `Festa de ${esc(p.child_name)}` : 'Festa sem nome';
+    const dateStr = p.party_date ? formatDate(p.party_date) : 'Data não definida';
+    const guestCount = p._guestCount != null ? p._guestCount : '–';
+    const confirmedCount = p._confirmedCount != null ? p._confirmedCount : '–';
+    return `<div class="party-card" onclick="enterParty('${p.id}')">
+      <button class="party-card-delete" onclick="event.stopPropagation(); confirmDeleteParty('${p.id}', ${JSON.stringify(name)})" title="Excluir festa">🗑</button>
+      <div class="party-card-top">
+        <div class="party-card-emoji">🎂</div>
+        <div class="party-card-info">
+          <div class="party-card-name">${name}</div>
+          <div class="party-card-date">📅 ${dateStr}</div>
+        </div>
+      </div>
+      <div class="party-card-stats">
+        <span class="party-card-stat">👥 ${guestCount} convidado(s)</span>
+        <span class="party-card-stat">✅ ${confirmedCount} confirmado(s)</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function createNewParty(){
+  const { data, error } = await sb.from('parties').insert({ user_id: currentUser.id }).select().single();
+  if(error){ console.error(error); showToast('⚠️ Erro ao criar festa'); return; }
+  await enterParty(data.id);
+}
+
+let partyPendingDeleteId = null;
+function confirmDeleteParty(partyId, name){
+  if(!confirm(`Tem certeza que deseja excluir "${name}"?\n\nTodos os convidados, tarefas e configurações dessa festa serão apagados permanentemente.`)) return;
+  deleteParty(partyId);
+}
+async function deleteParty(partyId){
+  const { error } = await sb.from('parties').delete().eq('id', partyId);
+  if(error){ console.error(error); showToast('⚠️ Erro ao excluir festa'); return; }
+  showToast('🗑️ Festa excluída');
+  await loadPartiesList();
+}
+
+function goToPartiesHub(){
+  showPartiesHub();
+}
+
+async function enterParty(partyId){
+  currentPartyId = partyId;
+  document.getElementById('authLoadingScreen').style.display = 'flex';
+  document.getElementById('partiesScreen').style.display = 'none';
+  document.getElementById('appRoot').style.display = 'none';
 
   await loadAllData();
 
   document.getElementById('authLoadingScreen').style.display = 'none';
   document.getElementById('appRoot').style.display = 'block';
+  document.getElementById('accountEmail').textContent = currentUser.email;
 
   renderTasks();
+  guestSearchQuery = '';
+  document.getElementById('guestSearchInput').value = '';
   renderGuests();
   renderTemplates();
   updateStats();
@@ -903,6 +1143,7 @@ async function enterApp(){
   applySettings();
   buildSettingsUI();
   toggleAgeField();
+  showTab('info', document.querySelector('.tab-btn'));
 }
 
 // ════════════════════════════════════════════════════════════
@@ -983,7 +1224,7 @@ async function handleAuthSubmit(){
     if(data.session){
       // auto-confirm is on, user is logged in immediately
       currentUser = data.user;
-      await enterApp();
+      await showPartiesHub();
     } else {
       showAuthSuccess('✅ Conta criada! Verifique seu e-mail para confirmar antes de entrar.');
     }
@@ -996,7 +1237,7 @@ async function handleAuthSubmit(){
       return;
     }
     currentUser = data.user;
-    await enterApp();
+    await showPartiesHub();
   }
 }
 
@@ -1051,19 +1292,15 @@ function setSyncError(){
 // DATA LOADING (Supabase → app state)
 // ════════════════════════════════════════════════════════════
 async function loadAllData(){
-  // 1) Party (get most recent, or create one)
-  const { data: parties, error: partiesErr } = await sb
+  // 1) Party (currentPartyId already set by enterParty)
+  const { data: p, error: partyErr } = await sb
     .from('parties')
     .select('*')
-    .eq('user_id', currentUser.id)
-    .order('created_at', { ascending: true })
-    .limit(1);
+    .eq('id', currentPartyId)
+    .single();
 
-  if(partiesErr){ console.error(partiesErr); }
-
-  if(parties && parties.length > 0){
-    const p = parties[0];
-    currentPartyId = p.id;
+  if(partyErr){ console.error(partyErr); partyInfo = {}; }
+  else {
     partyInfo = {
       child: p.child_name || '',
       theme: p.theme || '',
@@ -1074,26 +1311,14 @@ async function loadAllData(){
       kids: p.expected_kids != null ? String(p.expected_kids) : '',
       notes: p.notes || ''
     };
-  } else {
-    // create a default party row for this user
-    const { data: created, error: createErr } = await sb
-      .from('parties')
-      .insert({ user_id: currentUser.id })
-      .select()
-      .single();
-    if(createErr){ console.error(createErr); }
-    else {
-      currentPartyId = created.id;
-      partyInfo = {};
-    }
   }
   restoreInfo();
 
-  // 2) Tasks
+  // 2) Tasks (scoped to this party)
   const { data: taskRows, error: taskErr } = await sb
     .from('tasks')
     .select('*')
-    .eq('user_id', currentUser.id)
+    .eq('party_id', currentPartyId)
     .order('created_at', { ascending: true });
 
   if(taskErr){ console.error(taskErr); }
@@ -1101,7 +1326,7 @@ async function loadAllData(){
   if(taskRows && taskRows.length > 0){
     tasks = taskRows.map(r => ({ id:r.id, text:r.text, cat:r.category, done:r.done }));
   } else {
-    // seed default checklist for new users
+    // seed default checklist for new parties
     const seeded = defaultTasks.map(t => ({
       user_id: currentUser.id, party_id: currentPartyId, text: t.text, category: t.cat, done: false
     }));
@@ -1110,11 +1335,11 @@ async function loadAllData(){
     else { tasks = insertedTasks.map(r => ({ id:r.id, text:r.text, cat:r.category, done:r.done })); }
   }
 
-  // 3) Guests
+  // 3) Guests (scoped to this party)
   const { data: guestRows, error: guestErr } = await sb
     .from('guests')
     .select('*')
-    .eq('user_id', currentUser.id)
+    .eq('party_id', currentPartyId)
     .order('created_at', { ascending: true });
 
   if(guestErr){ console.error(guestErr); guests = []; }
@@ -1126,11 +1351,11 @@ async function loadAllData(){
     }));
   }
 
-  // 4) Settings
+  // 4) Settings (scoped to this party)
   const { data: settingsRow, error: settingsErr } = await sb
     .from('app_settings')
     .select('*')
-    .eq('user_id', currentUser.id)
+    .eq('party_id', currentPartyId)
     .maybeSingle();
 
   if(settingsErr){ console.error(settingsErr); }
@@ -1145,7 +1370,8 @@ async function loadAllData(){
     };
   } else {
     // shouldn't normally happen (trigger creates it), but just in case
-    await sb.from('app_settings').upsert({ user_id: currentUser.id, ...defaultSettingsPayload() });
+    appSettings = defaultSettingsPayload();
+    await sb.from('app_settings').upsert({ party_id: currentPartyId, ...appSettings });
   }
 }
 
@@ -1439,13 +1665,36 @@ function sortGuestList(list){
   // 'recent' = keep insertion order (already chronological)
   return sorted;
 }
+function onGuestSearchInput(){
+  guestSearchQuery = document.getElementById('guestSearchInput').value.trim().toLowerCase();
+  guestPage = 1;
+  document.getElementById('guestSearchClear').style.display = guestSearchQuery ? 'flex' : 'none';
+  document.getElementById('guestSearchIco').style.display = guestSearchQuery ? 'none' : 'block';
+  renderGuests();
+}
+function clearGuestSearch(){
+  document.getElementById('guestSearchInput').value = '';
+  guestSearchQuery = '';
+  guestPage = 1;
+  document.getElementById('guestSearchClear').style.display = 'none';
+  document.getElementById('guestSearchIco').style.display = 'block';
+  renderGuests();
+}
 function renderGuests(){
   const c = document.getElementById('guestList');
   let list = guestFilter==='all' ? guests : guests.filter(g=>g.status===guestFilter);
+  if(guestSearchQuery){
+    list = list.filter(g =>
+      (g.name||'').toLowerCase().includes(guestSearchQuery) ||
+      (g.tag||'').toLowerCase().includes(guestSearchQuery)
+    );
+  }
   list = sortGuestList(list);
 
   if(!list.length){
-    c.innerHTML='<div class="empty"><div class="emoji">🎈</div><p>Nenhum convidado nesta categoria.</p></div>';
+    c.innerHTML = guestSearchQuery
+      ? '<div class="empty"><div class="emoji">🔍</div><p>Nenhum convidado encontrado para essa busca.</p></div>'
+      : '<div class="empty"><div class="emoji">🎈</div><p>Nenhum convidado nesta categoria.</p></div>';
     document.getElementById('guestPagination').innerHTML='';
     document.getElementById('guestPageInfo').textContent='';
     return;
@@ -1573,6 +1822,175 @@ function exportGuests(){
   const child = partyInfo.child ? partyInfo.child.replace(/\s+/g,'_') : 'festa';
   XLSX.writeFile(wb, `convidados_${child}.xlsx`);
   showToast('📊 Planilha exportada com sucesso!');
+}
+
+// ════════════════════════════════════════════════════════════
+// TEMPLATE DE PLANILHA (modelo para download)
+// ════════════════════════════════════════════════════════════
+function downloadGuestTemplate(){
+  const headers = ['Nome', 'Tipo (Adulto/Criança)', 'Sexo (Menina/Menino - só se Criança)', 'Idade (só se Criança)', 'Tag', 'WhatsApp', 'Status (Confirmado/Aguardando/Não vem)'];
+  const example = ['Maria Silva', 'Adulto', '', '', 'Convite 01', '11999999999', 'Aguardando'];
+  const example2 = ['João Silva', 'Criança', 'Menino', '7', 'Convite 01', '', 'Aguardando'];
+
+  const data = [headers, example, example2];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [{wch:24},{wch:22},{wch:30},{wch:18},{wch:16},{wch:16},{wch:30}];
+  headers.forEach((h,i)=>{
+    const ref = XLSX.utils.encode_cell({r:0,c:i});
+    if(ws[ref]) ws[ref].s = {font:{bold:true}, fill:{fgColor:{rgb:'EFF6FF'}}};
+  });
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Modelo Convidados');
+  XLSX.writeFile(wb, 'modelo_convidados_festakids.xlsx');
+  showToast('📄 Modelo baixado! Preencha e depois importe.');
+}
+
+// ════════════════════════════════════════════════════════════
+// IMPORTAR PLANILHA DE CONVIDADOS
+// ════════════════════════════════════════════════════════════
+function normalizeForCompare(s){
+  return (s||'').toString().trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
+function handleImportFile(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, { type: 'array' });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+      await processImportRows(rows);
+    } catch(err){
+      console.error(err);
+      showToast('⚠️ Não foi possível ler o arquivo. Verifique o formato.');
+    }
+    event.target.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+async function processImportRows(rows){
+  if(!rows || rows.length < 2){
+    showToast('⚠️ Planilha vazia ou sem dados');
+    return;
+  }
+
+  // skip header row (row 0)
+  const dataRows = rows.slice(1).filter(r => r && r[0] && String(r[0]).trim());
+
+  if(!dataRows.length){
+    showToast('⚠️ Nenhum convidado encontrado na planilha');
+    return;
+  }
+
+  const existingNames = new Set(guests.map(g => normalizeForCompare(g.name)));
+  const toInsert = [];
+  const errors = [];
+  let skippedDupes = 0;
+  const seenInFile = new Set();
+
+  dataRows.forEach((row, idx) => {
+    const rowNum = idx + 2; // +2 porque pulamos header e arrays são 0-index
+    const name = String(row[0]||'').trim();
+    if(!name){ return; }
+
+    const typeRaw = normalizeForCompare(row[1]);
+    const isChild = typeRaw.includes('crian');
+    const type = isChild ? 'crianca' : 'adulto';
+
+    const genderRaw = normalizeForCompare(row[2]);
+    let gender = '';
+    if(isChild){
+      if(genderRaw.includes('menina')) gender = 'menina';
+      else if(genderRaw.includes('menino')) gender = 'menino';
+      else gender = 'menina'; // default
+    }
+
+    let age = '';
+    if(isChild && row[3] !== '' && row[3] != null){
+      const ageNum = parseInt(row[3]);
+      if(!isNaN(ageNum) && ageNum >= 0 && ageNum <= 17){ age = String(ageNum); }
+    }
+
+    const tag = String(row[4]||'').trim();
+    const phoneRaw = String(row[5]||'').replace(/\D/g,'');
+    const phone = phoneRaw;
+
+    const statusRaw = normalizeForCompare(row[6]);
+    let status = 'pending';
+    if(statusRaw.includes('confirm')) status = 'confirmed';
+    else if(statusRaw.includes('nao vem') || statusRaw.includes('não vem') || statusRaw.includes('declin')) status = 'declined';
+    else if(statusRaw.includes('aguard')) status = 'pending';
+
+    const normalizedName = normalizeForCompare(name);
+    if(existingNames.has(normalizedName) || seenInFile.has(normalizedName)){
+      skippedDupes++;
+      return;
+    }
+    seenInFile.add(normalizedName);
+
+    const avatar = isChild ? (gender==='menina' ? '👧' : '👦') : '🧑';
+
+    toInsert.push({
+      user_id: currentUser.id,
+      party_id: currentPartyId,
+      name, phone,
+      guest_type: type,
+      gender: isChild ? gender : null,
+      age: isChild && age ? parseInt(age) : null,
+      status,
+      tag,
+      responsible: !!phone,
+      avatar
+    });
+  });
+
+  if(!toInsert.length){
+    renderImportSummary({ inserted: 0, skipped: skippedDupes, errors: [], total: dataRows.length });
+    showToast('⚠️ Nenhum convidado novo para importar');
+    return;
+  }
+
+  setSyncing();
+  const { data: inserted, error } = await sb.from('guests').insert(toInsert).select();
+
+  if(error){
+    console.error(error);
+    setSyncError();
+    showToast('⚠️ Erro ao importar convidados');
+    return;
+  }
+
+  inserted.forEach(r => {
+    guests.push({
+      id:r.id, name:r.name, phone:r.phone||'', type:r.guest_type,
+      gender:r.gender||'', age:r.age!=null?String(r.age):'',
+      status:r.status, tag:r.tag||'', responsible:r.responsible, avatar:r.avatar
+    });
+  });
+
+  guestPage = 1;
+  renderGuests();
+  updateStats();
+  setSynced();
+
+  renderImportSummary({ inserted: inserted.length, skipped: skippedDupes, errors: [], total: dataRows.length });
+  showToast(`✅ ${inserted.length} convidado(s) importado(s)!`);
+}
+
+function renderImportSummary({ inserted, skipped, errors, total }){
+  const el = document.getElementById('importSummary');
+  let html = `<div class="import-summary">
+    <div class="import-summary-row ok"><span class="lbl">✅ Importados com sucesso</span><span class="val">${inserted}</span></div>
+    <div class="import-summary-row skip"><span class="lbl">⏭️ Ignorados (já existiam)</span><span class="val">${skipped}</span></div>
+    <div class="import-summary-row"><span class="lbl">📋 Total de linhas na planilha</span><span class="val">${total}</span></div>
+  </div>`;
+  el.innerHTML = html;
+  setTimeout(() => { el.innerHTML = ''; }, 12000);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1789,7 +2207,7 @@ async function persistSettings(){
     title: appSettings.title, font: appSettings.font, logo: appSettings.logo,
     banner: appSettings.banner, theme: appSettings.theme
   };
-  const { error } = await sb.from('app_settings').update(payload).eq('user_id', currentUser.id);
+  const { error } = await sb.from('app_settings').update(payload).eq('party_id', currentPartyId);
   if(error){ console.error(error); setSyncError(); } else { setSynced(); }
 }
 
