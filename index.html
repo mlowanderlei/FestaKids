@@ -1145,7 +1145,7 @@ function renderPartyCards(){
     const guestCount = p._guestCount != null ? p._guestCount : '–';
     const confirmedCount = p._confirmedCount != null ? p._confirmedCount : '–';
     return `<div class="party-card">
-      <button class="party-card-delete" onclick="confirmDeleteParty('${p.id}', ${JSON.stringify(name)})" title="Excluir festa">🗑</button>
+      <button class="party-card-delete" data-party-id="${p.id}" data-party-name="${esc(name)}" onclick="handleDeleteBtnClick(this)" title="Excluir festa">🗑</button>
       <div class="party-card-clickzone" onclick="enterParty('${p.id}')">
         <div class="party-card-top">
           <div class="party-card-emoji">🎂</div>
@@ -1170,6 +1170,11 @@ async function createNewParty(){
 }
 
 let partyPendingDeleteId = null;
+function handleDeleteBtnClick(btn){
+  const partyId = btn.getAttribute('data-party-id');
+  const name = btn.getAttribute('data-party-name');
+  confirmDeleteParty(partyId, name);
+}
 function confirmDeleteParty(partyId, name){
   partyPendingDeleteId = partyId;
   document.getElementById('deletePartyName').textContent = name;
