@@ -1000,28 +1000,66 @@ async function bootstrap(){
   const { data: { session } } = await sb.auth.getSession();
   if(session && session.user){
     currentUser = session.user;
-    await showPartiesHub();
+    await showPartiesHub(true);
   } else {
-    showAuthScreen();
+    showAuthScreen(true);
   }
 
   sb.auth.onAuthStateChange((event, session) => {
     if(event === 'SIGNED_IN' && session && (!currentUser || currentUser.id !== session.user.id)){
       currentUser = session.user;
-      showPartiesHub();
+      showPartiesHub(true);
     } else if(event === 'SIGNED_OUT'){
       currentUser = null;
       currentPartyId = null;
-      showAuthScreen();
+      showAuthScreen(true);
     }
   });
+
+  window.addEventListener('popstate', handlePopState);
 }
 
-function showAuthScreen(){
+// ════════════════════════════════════════════════════════════
+// NAVEGAÇÃO / HISTÓRICO (faz o botão "voltar" do celular
+// navegar dentro do app em vez de sair dele)
+// ════════════════════════════════════════════════════════════
+function pushHistoryState(screen, partyId){
+  const state = { screen, partyId: partyId || null };
+  history.pushState(state, '', '#' + screen + (partyId ? '/' + partyId : ''));
+}
+function replaceHistoryState(screen, partyId){
+  const state = { screen, partyId: partyId || null };
+  history.replaceState(state, '', '#' + screen + (partyId ? '/' + partyId : ''));
+}
+function handlePopState(event){
+  const state = event.state;
+  if(!state){
+    // sem estado conhecido (ex: entrada inicial da página) — manda para a tela certa
+    // com base em se há sessão ativa, sem forçar logout
+    if(currentUser){ showPartiesHub(false); } else { showAuthScreen(false); }
+    return;
+  }
+  if(state.screen === 'auth'){
+    showAuthScreen(false);
+    return;
+  }
+  if(state.screen === 'hub'){
+    showPartiesHub(false);
+    return;
+  }
+  if(state.screen === 'party' && state.partyId){
+    enterParty(state.partyId, false);
+    return;
+  }
+  showPartiesHub(false);
+}
+
+function showAuthScreen(pushState){
   document.getElementById('authLoadingScreen').style.display = 'none';
   document.getElementById('authScreen').style.display = 'flex';
   document.getElementById('partiesScreen').style.display = 'none';
   document.getElementById('appRoot').style.display = 'none';
+  if(pushState) replaceHistoryState('auth');
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1029,7 +1067,7 @@ function showAuthScreen(){
 // ════════════════════════════════════════════════════════════
 let userParties = [];
 
-async function showPartiesHub(){
+async function showPartiesHub(pushState){
   document.getElementById('authLoadingScreen').style.display = 'flex';
   document.getElementById('authScreen').style.display = 'none';
   document.getElementById('appRoot').style.display = 'none';
@@ -1040,6 +1078,10 @@ async function showPartiesHub(){
 
   document.getElementById('authLoadingScreen').style.display = 'none';
   document.getElementById('partiesScreen').style.display = 'block';
+
+  if(pushState === true) pushHistoryState('hub');
+  else if(pushState === false) { /* veio do popstate, não mexe no histórico */ }
+  else replaceHistoryState('hub');
 }
 
 async function loadPartiesList(){
@@ -1111,17 +1153,23 @@ function confirmDeleteParty(partyId, name){
   deleteParty(partyId);
 }
 async function deleteParty(partyId){
-  const { error } = await sb.from('parties').delete().eq('id', partyId);
-  if(error){ console.error(error); showToast('⚠️ Erro ao excluir festa'); return; }
+  const { data, error } = await sb.from('parties').delete().eq('id', partyId).select();
+  if(error){ console.error(error); showToast('⚠️ Erro ao excluir festa: ' + error.message); return; }
+  if(!data || data.length === 0){
+    showToast('⚠️ Não foi possível excluir (permissão negada ou festa não encontrada)');
+    return;
+  }
   showToast('🗑️ Festa excluída');
+  userParties = userParties.filter(p => p.id !== partyId);
+  renderPartyCards();
   await loadPartiesList();
 }
 
 function goToPartiesHub(){
-  showPartiesHub();
+  showPartiesHub(true);
 }
 
-async function enterParty(partyId){
+async function enterParty(partyId, pushState){
   currentPartyId = partyId;
   document.getElementById('authLoadingScreen').style.display = 'flex';
   document.getElementById('partiesScreen').style.display = 'none';
@@ -1144,6 +1192,10 @@ async function enterParty(partyId){
   buildSettingsUI();
   toggleAgeField();
   showTab('info', document.querySelector('.tab-btn'));
+
+  if(pushState === true) pushHistoryState('party', partyId);
+  else if(pushState === false) { /* veio do popstate, não mexe no histórico */ }
+  else pushHistoryState('party', partyId);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1224,7 +1276,7 @@ async function handleAuthSubmit(){
     if(data.session){
       // auto-confirm is on, user is logged in immediately
       currentUser = data.user;
-      await showPartiesHub();
+      await showPartiesHub(true);
     } else {
       showAuthSuccess('✅ Conta criada! Verifique seu e-mail para confirmar antes de entrar.');
     }
@@ -1237,7 +1289,7 @@ async function handleAuthSubmit(){
       return;
     }
     currentUser = data.user;
-    await showPartiesHub();
+    await showPartiesHub(true);
   }
 }
 
