@@ -489,9 +489,10 @@
   .party-card-list { display: flex; flex-direction: column; gap: 12px; }
   .party-card {
     background: var(--white); border-radius: 20px; padding: 18px; box-shadow: var(--card-shadow);
-    cursor: pointer; transition: transform .15s, box-shadow .15s; position: relative;
+    transition: box-shadow .15s; position: relative;
   }
-  .party-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+  .party-card-clickzone { cursor: pointer; padding-right: 38px; }
+  .party-card-clickzone:active { opacity: 0.85; }
   .party-card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
   .party-card-emoji { font-size: 32px; flex-shrink: 0; }
   .party-card-info { flex: 1; min-width: 0; }
@@ -503,13 +504,12 @@
     background: #F5F5FF; color: var(--dark);
   }
   .party-card-delete {
-    position: absolute; top: 14px; right: 14px; width: 30px; height: 30px;
-    border-radius: 8px; border: none; background: #FDECEA; color: #E03E2D;
-    font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: background .2s; opacity: 0; pointer-events: none;
+    position: absolute; top: 14px; right: 14px; width: 34px; height: 34px;
+    border-radius: 9px; border: none; background: #FDECEA; color: #E03E2D;
+    font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background .2s; z-index: 2;
   }
-  .party-card:hover .party-card-delete { opacity: 1; pointer-events: auto; }
-  .party-card-delete:hover { background: #E03E2D; color: #fff; }
+  .party-card-delete:hover, .party-card-delete:active { background: #E03E2D; color: #fff; }
 
   .btn-back-hub {
     background: rgba(255,255,255,0.2); color: #fff; border: none; border-radius: 8px;
@@ -1000,9 +1000,9 @@ async function bootstrap(){
   const { data: { session } } = await sb.auth.getSession();
   if(session && session.user){
     currentUser = session.user;
-    await showPartiesHub(true);
+    await showPartiesHub(); // sem args = replaceState (não empilha sobre a entrada inicial)
   } else {
-    showAuthScreen(true);
+    showAuthScreen(); // sem args = replaceState
   }
 
   sb.auth.onAuthStateChange((event, session) => {
@@ -1124,18 +1124,20 @@ function renderPartyCards(){
     const dateStr = p.party_date ? formatDate(p.party_date) : 'Data não definida';
     const guestCount = p._guestCount != null ? p._guestCount : '–';
     const confirmedCount = p._confirmedCount != null ? p._confirmedCount : '–';
-    return `<div class="party-card" onclick="enterParty('${p.id}')">
-      <button class="party-card-delete" onclick="event.stopPropagation(); confirmDeleteParty('${p.id}', ${JSON.stringify(name)})" title="Excluir festa">🗑</button>
-      <div class="party-card-top">
-        <div class="party-card-emoji">🎂</div>
-        <div class="party-card-info">
-          <div class="party-card-name">${name}</div>
-          <div class="party-card-date">📅 ${dateStr}</div>
+    return `<div class="party-card">
+      <button class="party-card-delete" onclick="confirmDeleteParty('${p.id}', ${JSON.stringify(name)})" title="Excluir festa">🗑</button>
+      <div class="party-card-clickzone" onclick="enterParty('${p.id}')">
+        <div class="party-card-top">
+          <div class="party-card-emoji">🎂</div>
+          <div class="party-card-info">
+            <div class="party-card-name">${name}</div>
+            <div class="party-card-date">📅 ${dateStr}</div>
+          </div>
         </div>
-      </div>
-      <div class="party-card-stats">
-        <span class="party-card-stat">👥 ${guestCount} convidado(s)</span>
-        <span class="party-card-stat">✅ ${confirmedCount} confirmado(s)</span>
+        <div class="party-card-stats">
+          <span class="party-card-stat">👥 ${guestCount} convidado(s)</span>
+          <span class="party-card-stat">✅ ${confirmedCount} confirmado(s)</span>
+        </div>
       </div>
     </div>`;
   }).join('');
